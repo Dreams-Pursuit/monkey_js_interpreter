@@ -1,4 +1,4 @@
-const TokenTypes = {
+export const TokenTypes = {
     ILLEGAL: "ILLEGAL",
     EOF: "EOF",
 
@@ -20,12 +20,12 @@ const TokenTypes = {
     RBRACE: "}",
 
     // keywords
-    FUNCTION: "FUNCTION",
-    LET: "LET"
+    FUNCTION: "fn",
+    LET: "let"
 }
 
 
-class Token {
+export class Token {
     tokenType;
     literal;
 
@@ -33,4 +33,17 @@ class Token {
         this.tokenType = tokenType;
         this.literal = literal;
     }
+}
+
+
+let keywords = {
+    "fn": TokenTypes.FUNCTION,
+    "let": TokenTypes.LET
+}
+
+export function LookupIdent(ident) {
+    if (keywords[ident]) {
+        return keywords[ident];
+    }
+    return TokenTypes.IDENT;
 }
