@@ -9,6 +9,15 @@ export const TokenTypes = {
     // Operators 
     ASSIGN: "=",
     PLUS: "+",
+    BANG: "!",
+    MINUS: "-",
+    ASTERISK: "*",
+    SLASH: "/",
+    EQ: "==",
+    NOT_EQ: "!=",
+
+    LT: "<",
+    GT: ">",
 
     // Delimiters
     COMMA: ",",
@@ -21,7 +30,13 @@ export const TokenTypes = {
 
     // keywords
     FUNCTION: "fn",
-    LET: "let"
+    LET: "let",
+    TRUE: "true",
+    FALSE: "false",
+    IF: "if",
+    ELSE: "else",
+    RETURN: "return"
+
 }
 
 
@@ -38,7 +53,12 @@ export class Token {
 
 let keywords = {
     "fn": TokenTypes.FUNCTION,
-    "let": TokenTypes.LET
+    "let": TokenTypes.LET,
+    "true": TokenTypes.TRUE,
+    "false": TokenTypes.FALSE,
+    "if": TokenTypes.IF,
+    "else": TokenTypes.ELSE,
+    "return": TokenTypes.RETURN
 }
 
 export function LookupIdent(ident) {
