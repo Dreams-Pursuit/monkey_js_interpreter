@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert";
-import { Token, TokenTypes } from "../token/token.js";
-import { New, Lexer } from "./lexer.js";
+import { TokenTypes } from "../token/token.js";
+import { New } from "./lexer.js";
 
 
 test("lexer", (t) => {
@@ -28,7 +28,7 @@ test("lexer", (t) => {
 
 
 test("lexer on code", (t) => {
-  const input = `let five = 5;
+  const input = ` let five = 5;
     let ten = 10;
        let add = fn(x, y) {
          x + y;

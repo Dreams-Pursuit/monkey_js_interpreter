@@ -1,10 +1,10 @@
 import readline from "readline";
-import { Lexer } from "../lexer/lexer.js";
+import { New } from "../lexer/lexer.js";
 import { TokenTypes } from "../token/token.js";
 
 const PROMPT = ">> ";
 
-export function start() {
+export function startREPL() {
   const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout,
@@ -12,16 +12,18 @@ export function start() {
   });
 
   rl.on("line", (line) => {
-    const lexer = new Lexer(line);
-
+    const lexer = New(line);
+    console.log("LINE: ", line);
     let tok;
     do {
       tok = lexer.nextToken();
       console.log(JSON.stringify(tok));
-    } while (tok.type !== TokenTypes.EOF);
+    } while (tok.tokenType !== TokenTypes.EOF && tok.tokenType !== TokenTypes.ILLEGAL);
 
     rl.prompt();
-  }).on("close", () => {
+  });
+
+  rl.on("close", () => {
     console.log("Have a great day!");
     process.exit(0);
   });
@@ -29,4 +31,3 @@ export function start() {
   rl.prompt();
 }
 
-start();

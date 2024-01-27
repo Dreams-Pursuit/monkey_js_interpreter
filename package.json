@@ -2,10 +2,12 @@
   "name": "monkey_js_interpreter",
   "version": "1.0.0",
   "description": "Based on http://interpreterbook.com/",
-  "main": "index.js",
+  "main": "main.js",
   "type": "module",
   "scripts": {
-    "test": "npm run lint",
+    "start": "nodemon ./src/main.js",
+    "test": "node ./src/lexer/lexer.test.js",
+    "test_s": "npm run lint",
     "lint": "eslint . && prettier -c \"**/*.js\"",
     "fmt": "prettier --write \"**/*.js\""
   },

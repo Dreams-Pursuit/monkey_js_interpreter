@@ -1,69 +1,67 @@
 export const TokenTypes = {
-    ILLEGAL: "ILLEGAL",
-    EOF: "EOF",
+  ILLEGAL: "ILLEGAL",
+  EOF: "EOF",
 
-    // identifiers + literals
-    IDENT: "IDENT",
-    INT: "INT",
+  // identifiers + literals
+  IDENT: "IDENT",
+  INT: "INT",
 
-    // Operators 
-    ASSIGN: "=",
-    PLUS: "+",
-    BANG: "!",
-    MINUS: "-",
-    ASTERISK: "*",
-    SLASH: "/",
-    EQ: "==",
-    NOT_EQ: "!=",
+  // Operators
+  ASSIGN: "=",
+  PLUS: "+",
+  BANG: "!",
+  MINUS: "-",
+  ASTERISK: "*",
+  SLASH: "/",
+  EQ: "==",
+  NOT_EQ: "!=",
 
-    LT: "<",
-    GT: ">",
+  LT: "<",
+  GT: ">",
 
-    // Delimiters
-    COMMA: ",",
-    SEMICOLON: ";",
+  // Delimiters
+  COMMA: ",",
+  SEMICOLON: ";",
 
-    LPAREN: "(",
-    RPAREN: ")",
-    LBRACE: "{",
-    RBRACE: "}",
+  LPAREN: "(",
+  RPAREN: ")",
+  LBRACE: "{",
+  RBRACE: "}",
 
-    // keywords
-    FUNCTION: "fn",
-    LET: "let",
-    TRUE: "true",
-    FALSE: "false",
-    IF: "if",
-    ELSE: "else",
-    RETURN: "return"
+  // keywords
+  FUNCTION: "fn",
+  LET: "let",
+  TRUE: "true",
+  FALSE: "false",
+  IF: "if",
+  ELSE: "else",
+  RETURN: "return"
 
-}
+};
 
 
 export class Token {
-    tokenType;
-    literal;
 
-    constructor(tokenType, literal) {
-        this.tokenType = tokenType;
-        this.literal = literal;
-    }
+  constructor(tokenType, literal) {
+    this.tokenType = tokenType;
+    this.literal = literal;
+  }
 }
 
 
-let keywords = {
-    "fn": TokenTypes.FUNCTION,
-    "let": TokenTypes.LET,
-    "true": TokenTypes.TRUE,
-    "false": TokenTypes.FALSE,
-    "if": TokenTypes.IF,
-    "else": TokenTypes.ELSE,
-    "return": TokenTypes.RETURN
-}
+const keywords = {
+  "fn": TokenTypes.FUNCTION,
+  "let": TokenTypes.LET,
+  "true": TokenTypes.TRUE,
+  "false": TokenTypes.FALSE,
+  "if": TokenTypes.IF,
+  "else": TokenTypes.ELSE,
+  "return": TokenTypes.RETURN
+};
 
 export function LookupIdent(ident) {
-    if (keywords[ident]) {
-        return keywords[ident];
-    }
-    return TokenTypes.IDENT;
+  if (keywords[ident]) {
+    return keywords[ident];
+  }
+  return TokenTypes.IDENT;
 }
