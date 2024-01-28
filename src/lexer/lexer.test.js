@@ -1,10 +1,10 @@
 import test from "node:test";
 import assert from "node:assert";
 import { TokenTypes } from "../token/token.js";
-import { New } from "./lexer.js";
+import { Lexer } from "./lexer.js";
 
 
-test("lexer", (t) => {
+test("lexer", () => {
   const input = "=+(){},;";
   const tests = [
     { expectedType: TokenTypes.ASSIGN, expectedLiteral: "=" },
@@ -17,7 +17,7 @@ test("lexer", (t) => {
     { expectedType: TokenTypes.SEMICOLON, expectedLiteral: ";" },
     { expectedType: TokenTypes.EOF, expectedLiteral: "" }
   ];
-  const lexer = New(input);
+  const lexer = new Lexer(input);
 
   tests.forEach((test, index) => {
     const token = lexer.nextToken();
@@ -27,7 +27,7 @@ test("lexer", (t) => {
 });
 
 
-test("lexer on code", (t) => {
+test("lexer on code", () => {
   const input = ` let five = 5;
     let ten = 10;
        let add = fn(x, y) {
@@ -74,7 +74,7 @@ test("lexer on code", (t) => {
     { expectedType: TokenTypes.SEMICOLON, expectedLiteral: ";" },
     { expectedType: TokenTypes.EOF, expectedLiteral: "" }
   ];
-  const lexer = New(input);
+  const lexer = new Lexer(input);
 
   tests.forEach((test, index) => {
     const token = lexer.nextToken();
@@ -84,7 +84,7 @@ test("lexer on code", (t) => {
 });
 
 
-test("lexer on code with additional symbols", (t) => {
+test("lexer on code with additional symbols", () => {
   const input = `let five = 5;
   let ten = 10;
      let add = fn(x, y) {
@@ -177,7 +177,7 @@ test("lexer on code with additional symbols", (t) => {
     { expectedType: TokenTypes.SEMICOLON, expectedLiteral: ";" },
     { expectedType: TokenTypes.EOF, expectedLiteral: "" }
   ];
-  const lexer = New(input);
+  const lexer = new Lexer(input);
 
   tests.forEach((test, index) => {
     const token = lexer.nextToken();

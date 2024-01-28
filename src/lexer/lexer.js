@@ -1,11 +1,13 @@
 import { Token, TokenTypes, LookupIdent } from "../token/token.js";
 
 export class Lexer {
-  constructor(input, position, readPosition, ch) {
+  constructor(input, position = 0, readPosition = 0, ch = 0) {
     this.input = input;
     this.position = position;
     this.readPosition = readPosition;
     this.ch = ch;
+
+    this.readChar();
   }
 
   readChar() {
@@ -127,13 +129,6 @@ export class Lexer {
   }
 
 }
-
-export function New(input) {
-  const lexer = new Lexer(input, 0, 0, 0);
-  lexer.readChar();
-  return lexer;
-}
-
 
 function isLetter(ch) {
   return "a" <= ch && ch <= "z" || "A" <= ch && ch <= "Z" || ch === "_";

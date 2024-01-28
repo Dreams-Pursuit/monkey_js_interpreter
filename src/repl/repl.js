@@ -1,5 +1,5 @@
 import readline from "readline";
-import { New } from "../lexer/lexer.js";
+import { Lexer } from "../lexer/lexer.js";
 import { TokenTypes } from "../token/token.js";
 
 const PROMPT = ">> ";
@@ -12,13 +12,13 @@ export function startREPL() {
   });
 
   rl.on("line", (line) => {
-    const lexer = New(line);
+    const lexer = new Lexer(line);
     console.log("LINE: ", line);
     let tok;
     do {
       tok = lexer.nextToken();
       console.log(JSON.stringify(tok));
-    } while (tok.tokenType !== TokenTypes.EOF && tok.tokenType !== TokenTypes.ILLEGAL);
+    } while (tok.tokenType !== TokenTypes.EOF);
 
     rl.prompt();
   });
