@@ -17,7 +17,7 @@ class Expression {
 
 export class Program {
     /* @param Statement[] */
-    statements;
+    statements = [];
 
     /* @returns {string} */
     tokenLiteral() {
@@ -29,18 +29,30 @@ export class Program {
 }
 
 export class LetStatement extends Statement {
-    token;
-    name;
-    value;
 
+    constructor(t = null, n = null, v = null) {
+        super();
+        this.token = t;
+        this.name = n;
+        this.value = v;
+    }
     statementNode() { }
-    tokenLiteral() { }
+    tokenLiteral() { 
+        return this.token.literal;
+    }
 }
 
 export class Identifier extends Expression {
     token;
     value;
 
+    constructor(token = null, value = null) {
+        super();
+        this.token = token;
+        this.value = value;
+    }
     expressionNode() { }
-    tokenLiteral() { }
+    tokenLiteral() { 
+        return this.token.literal;
+    }
 }

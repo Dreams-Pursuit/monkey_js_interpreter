@@ -1,15 +1,14 @@
 import {} from "../lexer/lexer.js";
-import {} from "../ast/ast.js";
-import {} from "../token/token.js";
+import { Program, LetStatement, Identifier } from "../ast/ast.js";
+import { TokenTypes } from "../token/token.js";
 
 export class Parser {
-    l;
-
     curToken;
     peekToken;
 
     constructor(l) {
         this.l = l;
+        this.errors = [];
         this.nextToken();
         this.nextToken();
     }
@@ -17,6 +16,10 @@ export class Parser {
     nextToken() {
         this.curToken = this.peekToken;
         this.peekToken = this.l.nextToken();
+    }
+
+    peekError(t) {
+        this.errors.push(`expected next token to be ${t}, got ${this.peekToken.tokenType} instead`, t, this.peekToken.tokenType);
     }
 
     parseProgram() {
@@ -56,8 +59,10 @@ export class Parser {
         if (this.peekTokenIs(t)) {
             this.nextToken();
             return true;
+        } else {
+            this.peekError(t);
+            return false;
         }
-        return false;
     }
     peekTokenIs(t) {
         return this.peekToken.tokenType === t;
@@ -65,8 +70,6 @@ export class Parser {
     curTokenIs(t) {
         return this.curToken.tokenType === t;
     }
-
-
 }
 
 
