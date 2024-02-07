@@ -59,7 +59,24 @@ test("parser: test return statements", (t) => {
   assert.strictEqual(program.statements.length, 3, `program.statements does not contain 3 statements. got=${program.statements.length}`);
 
   program.statements.forEach((stmt) => {
-    
+
     assert.strictEqual(stmt.tokenLiteral(), "return", `s.TokenLiteral not 'return'. got=${stmt.tokenLiteral()}`);
   });
+});
+
+
+test("parser: test identifier expression", (t) => {
+  const input = "foobar;";
+  const lexer = new Lexer(input);
+  const parser = new Parser(lexer);
+
+  const program = parser.parseProgram();
+
+  checkParserErrors(t, parser);
+
+  assert.strictEqual(program.statements.length, 1, `program has not enough statements. got=${program.statements.length}`);
+
+  const stmt = program.statements[0];
+
+  assert.strictEqual(stmt.String(), "foobar;", `s.String() wrong. got=${stmt.String()}`);
 });

@@ -3,6 +3,7 @@
 export class Node {
   /* @returns {string}*/
   tokenLiteral() { throw new Error("not implemented"); }
+  String() { throw new Error("not implemented"); }
 }
 
 class Statement {
@@ -26,6 +27,33 @@ export class Program {
         }
         return "";
     }
+
+    String() {
+        let out = "";
+        this.statements.forEach((s) => {
+            out += s.String();
+        });
+        return out;
+    }
+}
+
+export class ExpressionStatement extends Statement {  
+    constructor(t = null, e = null) {
+        super();
+        this.token = t;
+        this.expression = e;
+    }
+    statementNode() { }
+    tokenLiteral() { 
+        return this.token.literal;
+    }
+    String() {
+        if (this.expression !== null) {
+            return this.expression.String();
+        }
+        return "";
+    }
+
 }
 
 export class LetStatement extends Statement {
@@ -40,6 +68,15 @@ export class LetStatement extends Statement {
     tokenLiteral() { 
         return this.token.literal;
     }
+
+    String() {
+        let out = `${this.tokenLiteral()} ${this.name.String()} = `;
+        if (this.value !== null) {
+            out += this.value.String();
+        }
+        out += ";";
+        return out;
+    }
 }
 
 export class ReturnStatement extends Statement {
@@ -51,6 +88,14 @@ export class ReturnStatement extends Statement {
     statementNode() { }
     tokenLiteral() { 
         return this.token.literal;
+    }
+    String() {
+        let out = `${this.tokenLiteral()} `;
+        if (this.returnValue !== null) {
+            out += this.returnValue.String();
+        }
+        out += ";";
+        return out;
     }
 
 }
@@ -67,5 +112,8 @@ export class Identifier extends Expression {
     expressionNode() { }
     tokenLiteral() { 
         return this.token.literal;
+    }
+    String() { 
+        return this.value;
     }
 }

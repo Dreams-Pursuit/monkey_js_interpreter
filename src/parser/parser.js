@@ -1,16 +1,38 @@
 import {} from "../lexer/lexer.js";
-import { Program, LetStatement, ReturnStatement, Identifier } from "../ast/ast.js";
+import { Program, LetStatement, ReturnStatement, Identifier, ExpressionStatement } from "../ast/ast.js";
 import { TokenTypes } from "../token/token.js";
+
+const LOWEST = 1;
+const EQUALS = 2;
+const LESSGREATER = 3;
+const SUM = 4;
+const PRODUCT = 5;
+const PREFIX = 6;
+const CALL = 7;
 
 export class Parser {
     curToken;
     peekToken;
 
+
+
     constructor(l) {
         this.l = l;
         this.errors = [];
+        this.prefixParseFns = {};
+        this.infixParseFns = {};
+
+        this.registerPrefix(TokenTypes.IDENT, this.parseIdentifier);
+
         this.nextToken();
         this.nextToken();
+    }
+
+    registerPrefix(tokenType, fn) {
+        this.prefixParseFns[tokenType] = fn;
+    }
+    registerInfix(tokenType, fn) {
+        this.infixParseFns[tokenType] = fn;
     }
 
     nextToken() {
@@ -33,6 +55,10 @@ export class Parser {
         }
         return program;
     }
+
+    parseIdentifier() {
+        return new Identifier(this.curToken, this.curToken.literal);
+    }
     parseStatement() {
         switch (this.curToken.tokenType) {
             case TokenTypes.LET:
@@ -40,9 +66,41 @@ export class Parser {
             case TokenTypes.RETURN:
                 return this.parseReturnStatement();
             default:
-                return null;
+                return this.parseExpressionStatement();
         }
     }
+    parseExpressionStatement() {
+        const stmt = new ExpressionStatement(this.curToken);
+        stmt.expression = this.parseExpression(LOWEST);
+        if (this.peekTokenIs(TokenTypes.SEMICOLON)) {
+            this.nextToken();
+        }
+        return stmt;
+    }
+    parseExpression(precedence) {
+        const prefix = this.prefixParseFns[this.curToken.tokenType];
+        if (prefix === null) {
+            return null;
+        }
+        let leftExp = prefix();
+        while (!this.peekTokenIs(TokenTypes.SEMICOLON) && precedence < this.peekPrecedence()) {
+            const infix = this.infixParseFns[this.peekToken.tokenType];
+            if (infix === null) {
+                return leftExp;
+            }
+            this.nextToken();
+            leftExp = infix(leftExp);
+        }
+        return leftExp;
+    }
+    peekPrecedence() {
+        const p = precedences[this.peekToken.tokenType];
+        if (p !== null) {
+            return p;
+        }
+        return LOWEST;
+    }
+
     parseLetStatement() {
         const stmt = new LetStatement(this.curToken);
         if (!this.expectPeek(TokenTypes.IDENT)) {
