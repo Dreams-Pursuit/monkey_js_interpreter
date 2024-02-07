@@ -1,5 +1,5 @@
 import {} from "../lexer/lexer.js";
-import { Program, LetStatement, Identifier } from "../ast/ast.js";
+import { Program, LetStatement, ReturnStatement, Identifier } from "../ast/ast.js";
 import { TokenTypes } from "../token/token.js";
 
 export class Parser {
@@ -37,6 +37,8 @@ export class Parser {
         switch (this.curToken.tokenType) {
             case TokenTypes.LET:
                 return this.parseLetStatement();
+            case TokenTypes.RETURN:
+                return this.parseReturnStatement();
             default:
                 return null;
         }
@@ -50,6 +52,14 @@ export class Parser {
         if (!this.expectPeek(TokenTypes.ASSIGN)) {
             return null;
         }
+        while (!this.curTokenIs(TokenTypes.SEMICOLON)) {
+            this.nextToken();
+        }
+        return stmt;
+    }
+    parseReturnStatement() {
+        const stmt = new ReturnStatement(this.curToken);
+        this.nextToken();
         while (!this.curTokenIs(TokenTypes.SEMICOLON)) {
             this.nextToken();
         }

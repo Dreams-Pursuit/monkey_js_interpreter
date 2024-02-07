@@ -42,6 +42,19 @@ export class LetStatement extends Statement {
     }
 }
 
+export class ReturnStatement extends Statement {
+    constructor(t = null, r = null) {
+        super();
+        this.token = t;
+        this.returnValue = r;
+    }
+    statementNode() { }
+    tokenLiteral() { 
+        return this.token.literal;
+    }
+
+}
+
 export class Identifier extends Expression {
     token;
     value;
