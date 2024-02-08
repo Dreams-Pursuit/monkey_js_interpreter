@@ -3,7 +3,6 @@ import assert from "node:assert";
 import { TokenTypes } from "../token/token.js";
 import { Lexer } from "./lexer.js";
 
-
 test("lexer", () => {
   const input = "=+(){},;";
   const tests = [
@@ -15,17 +14,24 @@ test("lexer", () => {
     { expectedType: TokenTypes.RBRACE, expectedLiteral: "}" },
     { expectedType: TokenTypes.COMMA, expectedLiteral: "," },
     { expectedType: TokenTypes.SEMICOLON, expectedLiteral: ";" },
-    { expectedType: TokenTypes.EOF, expectedLiteral: "" }
+    { expectedType: TokenTypes.EOF, expectedLiteral: "" },
   ];
   const lexer = new Lexer(input);
 
   tests.forEach((test, index) => {
     const token = lexer.nextToken();
-    assert.strictEqual(token.tokenType, test.expectedType, `Test ${index} - TokenType wrong. Expected=${test.expectedType}, got=${token.type}`);
-    assert.strictEqual(token.literal, test.expectedLiteral, `Test ${index} - Literal wrong. Expected=${test.expectedLiteral}, got=${token.literal}`);
+    assert.strictEqual(
+      token.tokenType,
+      test.expectedType,
+      `Test ${index} - TokenType wrong. Expected=${test.expectedType}, got=${token.type}`,
+    );
+    assert.strictEqual(
+      token.literal,
+      test.expectedLiteral,
+      `Test ${index} - Literal wrong. Expected=${test.expectedLiteral}, got=${token.literal}`,
+    );
   });
 });
-
 
 test("lexer on code", () => {
   const input = ` let five = 5;
@@ -72,17 +78,24 @@ test("lexer on code", () => {
     { expectedType: TokenTypes.IDENT, expectedLiteral: "ten" },
     { expectedType: TokenTypes.RPAREN, expectedLiteral: ")" },
     { expectedType: TokenTypes.SEMICOLON, expectedLiteral: ";" },
-    { expectedType: TokenTypes.EOF, expectedLiteral: "" }
+    { expectedType: TokenTypes.EOF, expectedLiteral: "" },
   ];
   const lexer = new Lexer(input);
 
   tests.forEach((test, index) => {
     const token = lexer.nextToken();
-    assert.strictEqual(token.tokenType, test.expectedType, `Test ${index} - TokenType wrong. Expected=${test.expectedType}, got=${token.type}`);
-    assert.strictEqual(token.literal, test.expectedLiteral, `Test ${index} - Literal wrong. Expected=${test.expectedLiteral}, got=${token.literal}`);
+    assert.strictEqual(
+      token.tokenType,
+      test.expectedType,
+      `Test ${index} - TokenType wrong. Expected=${test.expectedType}, got=${token.type}`,
+    );
+    assert.strictEqual(
+      token.literal,
+      test.expectedLiteral,
+      `Test ${index} - Literal wrong. Expected=${test.expectedLiteral}, got=${token.literal}`,
+    );
   });
 });
-
 
 test("lexer on code with additional symbols", () => {
   const input = `let five = 5;
@@ -175,13 +188,21 @@ test("lexer on code with additional symbols", () => {
     { expectedType: TokenTypes.NOT_EQ, expectedLiteral: "!=" },
     { expectedType: TokenTypes.INT, expectedLiteral: "9" },
     { expectedType: TokenTypes.SEMICOLON, expectedLiteral: ";" },
-    { expectedType: TokenTypes.EOF, expectedLiteral: "" }
+    { expectedType: TokenTypes.EOF, expectedLiteral: "" },
   ];
   const lexer = new Lexer(input);
 
   tests.forEach((test, index) => {
     const token = lexer.nextToken();
-    assert.strictEqual(token.tokenType, test.expectedType, `Test ${index} - TokenType wrong. Expected=${test.expectedType}, got=${token.type}`);
-    assert.strictEqual(token.literal, test.expectedLiteral, `Test ${index} - Literal wrong. Expected=${test.expectedLiteral}, got=${token.literal}`);
+    assert.strictEqual(
+      token.tokenType,
+      test.expectedType,
+      `Test ${index} - TokenType wrong. Expected=${test.expectedType}, got=${token.type}`,
+    );
+    assert.strictEqual(
+      token.literal,
+      test.expectedLiteral,
+      `Test ${index} - Literal wrong. Expected=${test.expectedLiteral}, got=${token.literal}`,
+    );
   });
 });

@@ -35,28 +35,24 @@ export const TokenTypes = {
   FALSE: "false",
   IF: "if",
   ELSE: "else",
-  RETURN: "return"
-
+  RETURN: "return",
 };
 
-
 export class Token {
-
   constructor(tokenType, literal) {
     this.tokenType = tokenType;
     this.literal = literal;
   }
 }
 
-
 const keywords = {
-  "fn": TokenTypes.FUNCTION,
-  "let": TokenTypes.LET,
-  "true": TokenTypes.TRUE,
-  "false": TokenTypes.FALSE,
-  "if": TokenTypes.IF,
-  "else": TokenTypes.ELSE,
-  "return": TokenTypes.RETURN
+  fn: TokenTypes.FUNCTION,
+  let: TokenTypes.LET,
+  true: TokenTypes.TRUE,
+  false: TokenTypes.FALSE,
+  if: TokenTypes.IF,
+  else: TokenTypes.ELSE,
+  return: TokenTypes.RETURN,
 };
 
 export function LookupIdent(ident) {

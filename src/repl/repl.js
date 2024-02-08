@@ -8,7 +8,7 @@ export function startREPL() {
   const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout,
-    prompt: PROMPT
+    prompt: PROMPT,
   });
 
   rl.on("line", (line) => {
@@ -30,4 +30,3 @@ export function startREPL() {
 
   rl.prompt();
 }
-
