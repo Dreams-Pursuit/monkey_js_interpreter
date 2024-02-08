@@ -8,6 +8,10 @@ import {
   IntegerLiteral,
   PrefixExpression,
   InfixExpression,
+  Boolean,
+  IfExpression,
+  BlockStatement,
+  FunctionLiteral,
 } from "../ast/ast.js";
 import { TokenTypes } from "../token/token.js";
 // import { trace, untrace } from "./parser_tracing.js";
@@ -46,6 +50,11 @@ export class Parser {
     this.registerPrefix(TokenTypes.INT, this.parseIntegerLiteral);
     this.registerPrefix(TokenTypes.BANG, this.parsePrefixExpression);
     this.registerPrefix(TokenTypes.MINUS, this.parsePrefixExpression);
+    this.registerPrefix(TokenTypes.TRUE, this.parseBoolean);
+    this.registerPrefix(TokenTypes.FALSE, this.parseBoolean);
+    this.registerPrefix(TokenTypes.LPAREN, this.parseGroupedExpression);
+    this.registerPrefix(TokenTypes.IF, this.parseIfExpression);
+    this.registerPrefix(TokenTypes.FUNCTION, this.parseFunctionLiteral);
 
     this.registerInfix(TokenTypes.PLUS, this.parseInfixExpression);
     this.registerInfix(TokenTypes.MINUS, this.parseInfixExpression);
@@ -92,16 +101,103 @@ export class Parser {
     return program;
   }
 
+  parseFunctionLiteral() {
+    const lit = new FunctionLiteral(this.curToken);
+    if (!this.expectPeek(TokenTypes.LPAREN)) {
+      return null;
+    }
+    lit.parameters = this.parseFunctionParameters();
+    if (!this.expectPeek(TokenTypes.LBRACE)) {
+      return null;
+    }
+    lit.body = this.parseBlockStatement();
+    return lit;
+  }
+
+  parseFunctionParameters() {
+    const identifiers = [];
+    if (this.peekTokenIs(TokenTypes.RPAREN)) {
+      this.nextToken();
+      return identifiers;
+    }
+    this.nextToken();
+    const ident = new Identifier(this.curToken, this.curToken.literal);
+    identifiers.push(ident);
+    while (this.peekTokenIs(TokenTypes.COMMA)) {
+      this.nextToken();
+      this.nextToken();
+      const ident = new Identifier(this.curToken, this.curToken.literal);
+      identifiers.push(ident);
+    }
+    if (!this.expectPeek(TokenTypes.RPAREN)) {
+      return null;
+    }
+    return identifiers;
+  }
+  parseIfExpression() {
+    const expression = new IfExpression(this.curToken);
+    if (!this.expectPeek(TokenTypes.LPAREN)) {
+      return null;
+    }
+    this.nextToken();
+    expression.condition = this.parseExpression(LOWEST);
+    if (!this.expectPeek(TokenTypes.RPAREN)) {
+      return null;
+    }
+    if (!this.expectPeek(TokenTypes.LBRACE)) {
+      return null;
+    }
+    expression.consequence = this.parseBlockStatement();
+    if (this.peekTokenIs(TokenTypes.ELSE)) {
+      this.nextToken();
+      if (!this.expectPeek(TokenTypes.LBRACE)) {
+        return null;
+      }
+      expression.alternative = this.parseBlockStatement();
+    }
+    return expression;
+  }
+
+  parseBlockStatement() {
+    const block = new BlockStatement(this.curToken);
+    this.nextToken();
+    while (!this.curTokenIs(TokenTypes.RBRACE)) {
+      const stmt = this.parseStatement();
+      if (stmt !== null) {
+        block.statements.push(stmt);
+      }
+      this.nextToken();
+    }
+    return block;
+  }
+  parseGroupedExpression() {
+    this.nextToken();
+    const exp = this.parseExpression(LOWEST);
+    if (!this.expectPeek(TokenTypes.RPAREN)) {
+      return null;
+    }
+    return exp;
+  }
+  parseBoolean() {
+    return new Boolean(this.curToken, this.curTokenIs(TokenTypes.TRUE));
+  }
+  //   parseInfixExpression(left) {
+  //     const expression = new InfixExpression(
+  //       this.curToken,
+  //       left,
+  //       this.curToken.literal,
+  //     );
+  //     const precedence = this.curPrecedence();
+  //     this.nextToken();
+  //     expression.right = this.parseExpression(precedence);
+  //     return expression;
+  //   }
   parseInfixExpression(left) {
-    const expression = new InfixExpression(
-      this.curToken,
-      left,
-      this.curToken.literal,
-    );
+    const operator = this.curToken.literal;
     const precedence = this.curPrecedence();
     this.nextToken();
-    expression.right = this.parseExpression(precedence);
-    return expression;
+    const right = this.parseExpression(precedence);
+    return new InfixExpression(this.curToken, left, operator, right);
   }
 
   parsePrefixExpression() {

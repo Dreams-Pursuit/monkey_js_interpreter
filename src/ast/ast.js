@@ -165,3 +165,78 @@ export class InfixExpression extends Expression {
     return `(${this.left.String()} ${this.operator} ${this.right.String()})`;
   }
 }
+
+export class Boolean extends Expression {
+  constructor(t = null, v = null) {
+    super();
+    this.token = t;
+    this.value = v;
+  }
+  expressionNode() {}
+  tokenLiteral() {
+    return this.token.literal;
+  }
+  String() {
+    return this.token.literal;
+  }
+}
+
+export class IfExpression extends Expression {
+  constructor(t = null, c = null, co = null, a = null) {
+    super();
+    this.token = t;
+    this.condition = c;
+    this.consequence = co;
+    this.alternative = a;
+  }
+  expressionNode() {}
+  tokenLiteral() {
+    return this.token.literal;
+  }
+  String() {
+    let out = `if ${this.condition.String()} ${this.consequence.String()}`;
+    if (this.alternative !== null) {
+      out += ` else ${this.alternative.String()}`;
+    }
+    return out;
+  }
+}
+
+export class BlockStatement extends Statement {
+  constructor(t = null, s = []) {
+    super();
+    this.token = t;
+    this.statements = s;
+  }
+  statementNode() {}
+  tokenLiteral() {
+    return this.token.literal;
+  }
+  String() {
+    let out = "";
+    this.statements.forEach((s) => {
+      out += s.String();
+    });
+    return out;
+  }
+}
+
+export class FunctionLiteral extends Expression {
+  constructor(t = null, p = [], b = null) {
+    super();
+    this.token = t;
+    this.parameters = p;
+    this.body = b;
+  }
+  expressionNode() {}
+  tokenLiteral() {
+    return this.token.literal;
+  }
+  String() {
+    let out = this.tokenLiteral() + "(";
+    out += this.parameters.map((p) => p.String()).join(", ");
+    out += ") ";
+    out += this.body.String();
+    return out;
+  }
+}

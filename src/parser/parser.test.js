@@ -130,19 +130,12 @@ test("parser: test integer expression", (t) => {
   );
 });
 
-function testIntegralLiteral(t, il, value) {
-  assert.strictEqual(il.value, value, `il.Value not ${value}. got=${il.value}`);
-  assert.strictEqual(
-    il.tokenLiteral(),
-    `${value}`,
-    `il.TokenLiteral not ${value}. got=${il.tokenLiteral()}`,
-  );
-}
-
 test("parser: test parsing prefix expressions", (t) => {
   const prefixTests = [
     { input: "!5;", operator: "!", value: 5 },
     { input: "-15;", operator: "-", value: 15 },
+    { input: "!true;", operator: "!", value: true },
+    { input: "!false;", operator: "!", value: false },
   ];
 
   prefixTests.forEach((tt) => {
@@ -176,6 +169,9 @@ test("parser: test parsing infix expressions", (t) => {
     { input: "5 < 5;", leftValue: 5, operator: "<", rightValue: 5 },
     { input: "5 == 5;", leftValue: 5, operator: "==", rightValue: 5 },
     { input: "5 != 5;", leftValue: 5, operator: "!=", rightValue: 5 },
+    { input: "true == true", leftValue: true, operator: "==", rightValue: true },
+    { input: "true != false", leftValue: true, operator: "!=", rightValue: false },
+    { input: "false == false", leftValue: false, operator: "==", rightValue: false },
   ];
 
   infixTests.forEach((tt) => {
@@ -201,54 +197,18 @@ test("parser: test parsing infix expressions", (t) => {
 
 test("parser: test operator precedence parsing", (t) => {
   const tests = [
-    {
-      input: "-a * b;",
-      expected: "((-a) * b)",
-    },
-    {
-      input: "!-a;",
-      expected: "(!(-a))",
-    },
-    {
-      input: "a + b + c;",
-      expected: "((a + b) + c)",
-    },
-    {
-      input: "a + b - c;",
-      expected: "((a + b) - c)",
-    },
-    {
-      input: "a * b * c;",
-      expected: "((a * b) * c)",
-    },
-    {
-      input: "a * b / c;",
-      expected: "((a * b) / c)",
-    },
-    {
-      input: "a + b / c;",
-      expected: "(a + (b / c))",
-    },
-    {
-      input: "a + b * c + d / e - f;",
-      expected: "(((a + (b * c)) + (d / e)) - f)",
-    },
-    {
-      input: "3 + 4; -5 * 5;",
-      expected: "(3 + 4)((-5) * 5)",
-    },
-    {
-      input: "5 > 4 == 3 < 4;",
-      expected: "((5 > 4) == (3 < 4))",
-    },
-    {
-      input: "5 < 4 != 3 > 4;",
-      expected: "((5 < 4) != (3 > 4))",
-    },
-    {
-      input: "3 + 4 * 5 == 3 * 1 + 4 * 5;",
-      expected: "((3 + (4 * 5)) == ((3 * 1) + (4 * 5)))",
-    },
+    { input: "-a * b", expected: "((-a) * b)" },
+    { input: "!-a", expected: "(!(-a))" },
+    { input: "a + b + c", expected: "((a + b) + c)" },
+    { input: "a + b - c", expected: "((a + b) - c)" },
+    { input: "a * b * c", expected: "((a * b) * c)" },
+    { input: "a * b / c", expected: "((a * b) / c)" },
+    { input: "a + b / c", expected: "(a + (b / c))" },
+    { input: "a + b * c + d / e - f", expected: "(((a + (b * c)) + (d / e)) - f)" },
+    { input: "3 + 4; -5 * 5", expected: "(3 + 4)((-5) * 5)" },
+    { input: "5 > 4 == 3 < 4", expected: "((5 > 4) == (3 < 4))" },
+    { input: "5 < 4 != 3 > 4", expected: "((5 < 4) != (3 > 4))" },
+    { input: "3 + 4 * 5 == 3 * 1 + 4 * 5", expected: "((3 + (4 * 5)) == ((3 * 1) + (4 * 5)))" },
   ];
 
   tests.forEach((tt) => {
@@ -262,5 +222,177 @@ test("parser: test operator precedence parsing", (t) => {
       tt.expected,
       `program.String() wrong. got=${program.String()}`,
     );
+  });
+});
+
+
+function testIntegralLiteral(t, il, value) {
+  assert.strictEqual(il.value, value, `il.Value not ${value}. got=${il.value}`);
+  assert.strictEqual(
+    il.tokenLiteral(),
+    `${value}`,
+    `il.TokenLiteral not ${value}. got=${il.tokenLiteral()}`,
+  );
+}
+
+function testIdentifier(t, exp, value) {
+  assert.strictEqual(exp.value, value, `exp.Value not ${value}. got=${exp.value}`);
+  assert.strictEqual(
+    exp.tokenLiteral(),
+    value,
+    `exp.TokenLiteral not ${value}. got=${exp.tokenLiteral()}`,
+  );
+}
+
+function testLiteralExpression(t, exp, expected) {
+  switch (expected.type) {
+  case "integer":
+    testIntegralLiteral(t, exp, expected.value);
+    break;
+  case "identifier":
+    testIdentifier(t, exp, expected.value);
+    break;
+  case "boolean":
+    testBooleanLiteral(t, exp, expected.value);
+    break;
+  default:
+    assert.fail(`type of exp not handled. got=${exp}`);
+  }
+}
+function testInfixExpression(t, exp, left, operator, right) {
+  assert.strictEqual(
+    exp.operator,
+    operator,
+    `exp.Operator not '${operator}'. got=${exp.operator}`,
+  );
+  testLiteralExpression(t, exp.left, left);
+  testLiteralExpression(t, exp.right, right);
+}
+
+function testBooleanLiteral(t, bl, value) {
+  assert.strictEqual(bl.value, value, `bl.Value not ${value}. got=${bl.value}`);
+  assert.strictEqual(
+    bl.tokenLiteral(),
+    `${value}`,
+    `bl.TokenLiteral not ${value}. got=${bl.tokenLiteral()}`,
+  );
+}
+test("parser: test boolean expression", (t) => {
+  const input = "true;";
+  const lexer = new Lexer(input);
+  const parser = new Parser(lexer);
+  const program = parser.parseProgram();
+  checkParserErrors(t, parser);
+
+  assert.strictEqual(
+    program.statements.length,
+    1,
+    `program has not enough statements. got=${program.statements.length}`,
+  );
+
+  const stmt = program.statements[0];
+  const expression = stmt.expression;
+  testBooleanLiteral(t, expression, true);
+});
+
+test("parser: test if expression", (t) => {
+  const input = "if (x < y) { x }";
+  const lexer = new Lexer(input);
+  const parser = new Parser(lexer);
+  const program = parser.parseProgram();
+  checkParserErrors(t, parser);
+
+  assert.strictEqual(
+    program.statements.length,
+    1,
+    `program has not enough statements. got=${program.statements.length}`,
+  );
+
+  const stmt = program.statements[0];
+  const expression = stmt.expression;
+  assert.strictEqual(
+    expression.String(),
+    "if (x < y) x",
+    `expression.String() wrong. got=${expression.String()}`,
+  );
+});
+
+test("parser: test if else expression", (t) => {
+  const input = "if (x < y) { x } else { y }";
+  const lexer = new Lexer(input);
+  const parser = new Parser(lexer);
+  const program = parser.parseProgram();
+  checkParserErrors(t, parser);
+
+  assert.strictEqual(
+    program.statements.length,
+    1,
+    `program has not enough statements. got=${program.statements.length}`,
+  );
+
+  const stmt = program.statements[0];
+  const expression = stmt.expression;
+  assert.strictEqual(
+    expression.String(),
+    "if (x < y) x else y",
+    `expression.String() wrong. got=${expression.String()}`,
+  );
+});
+
+test("parser: test function literal parsing", (t) => {
+  const input = "fn(x, y) { x + y; }";
+  const lexer = new Lexer(input);
+  const parser = new Parser(lexer);
+  const program = parser.parseProgram();
+  checkParserErrors(t, parser);
+
+  assert.strictEqual(
+    program.statements.length,
+    1,
+    `program has not enough statements. got=${program.statements.length}`,
+  );
+
+  const stmt = program.statements[0];
+  const expression = stmt.expression;
+  assert.strictEqual(
+    expression.String(),
+    "fn(x, y) x + y",
+    `expression.String() wrong. got=${expression.String()}`,
+  );
+
+  if (expression.parameters.length !== 2) {
+    assert.fail(`function literal parameters wrong. want 2. got=${expression.parameters.length}`);
+  }
+  testLiteralExpression(t, expression.parameters[0], { type: "identifier", value: "x" });
+  testLiteralExpression(t, expression.parameters[1], { type: "identifier", value: "y" });
+
+  if (expression.body.statements.length !== 1) {
+    assert.fail(`function literal body statements wrong. want 1. got=${expression.body.statements.length}`);
+  }
+  testInfixExpression(t, expression.body.statements[0].expression, { type: "identifier", value: "x" }, "+", { type: "identifier", value: "y" });
+});
+
+test("parser: test function parameter parsing", (t) => {
+  const tests = [
+    { input: "fn() {};", expectedParams: [] },
+    { input: "fn(x) {};", expectedParams: ["x"] },
+    { input: "fn(x, y, z) {};", expectedParams: ["x", "y", "z"] },
+  ];
+
+  tests.forEach((tt) => {
+    const lexer = new Lexer(tt.input);
+    const parser = new Parser(lexer);
+    const program = parser.parseProgram();
+    checkParserErrors(t, parser);
+
+    const stmt = program.statements[0];
+    const expression = stmt.expression;
+
+    if (expression.parameters.length !== tt.expectedParams.length) {
+      assert.fail(`length parameters wrong. want ${tt.expectedParams.length}. got=${expression.parameters.length}`);
+    }
+    tt.expectedParams.forEach((ident, index) => {
+      testLiteralExpression(t, expression.parameters[index], { type: "identifier", value: ident });
+    });
   });
 });
