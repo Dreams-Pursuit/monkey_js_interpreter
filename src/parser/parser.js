@@ -304,7 +304,12 @@ export class Parser {
     if (!this.expectPeek(TokenTypes.ASSIGN)) {
       return null;
     }
-    while (!this.curTokenIs(TokenTypes.SEMICOLON)) {
+    // while (!this.curTokenIs(TokenTypes.SEMICOLON)) {
+    //   this.nextToken();
+    // }
+    this.nextToken();
+    stmt.value = this.parseExpression(LOWEST);
+    if (this.peekTokenIs(TokenTypes.SEMICOLON)) {
       this.nextToken();
     }
     return stmt;
@@ -312,7 +317,11 @@ export class Parser {
   parseReturnStatement() {
     const stmt = new ReturnStatement(this.curToken);
     this.nextToken();
-    while (!this.curTokenIs(TokenTypes.SEMICOLON)) {
+    // while (!this.curTokenIs(TokenTypes.SEMICOLON)) {
+    //   this.nextToken();
+    // }
+    stmt.returnValue = this.parseExpression(LOWEST);
+    if (this.peekTokenIs(TokenTypes.SEMICOLON)) {
       this.nextToken();
     }
     return stmt;
