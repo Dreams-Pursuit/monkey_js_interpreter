@@ -1,9 +1,9 @@
 import test from "node:test";
 import assert from "node:assert";
 import { TokenTypes } from "../token/token.js";
-import { Program, LetStatement, Identifier } from "./ast.js";
+import { Program, LetStatement, Identifier, Token } from "./ast.js";
 
-test("ast: testString", (t) => {
+test("ast: testString", () => {
   const program = new Program();
   const letStatement = new LetStatement(
     new Token(TokenTypes.LET, "let"),
