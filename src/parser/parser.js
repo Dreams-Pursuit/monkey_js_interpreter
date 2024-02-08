@@ -12,6 +12,7 @@ import {
   IfExpression,
   BlockStatement,
   FunctionLiteral,
+  CallExpression,
 } from "../ast/ast.js";
 import { TokenTypes } from "../token/token.js";
 // import { trace, untrace } from "./parser_tracing.js";
@@ -64,6 +65,7 @@ export class Parser {
     this.registerInfix(TokenTypes.NOT_EQ, this.parseInfixExpression);
     this.registerInfix(TokenTypes.LT, this.parseInfixExpression);
     this.registerInfix(TokenTypes.GT, this.parseInfixExpression);
+    this.registerInfix(TokenTypes.LPAREN, this.parseCallExpression);
 
     this.nextToken();
     this.nextToken();
@@ -99,6 +101,30 @@ export class Parser {
       this.nextToken();
     }
     return program;
+  }
+
+  parseCallExpression(functionName) {
+    const exp = new CallExpression(this.curToken, functionName);
+    exp.arguments = this.parseExpressionList(TokenTypes.RPAREN);
+    return exp;
+  }
+  parseExpressionList(end) {
+    const list = [];
+    if (this.peekTokenIs(end)) {
+      this.nextToken();
+      return list;
+    }
+    this.nextToken();
+    list.push(this.parseExpression(LOWEST));
+    while (this.peekTokenIs(TokenTypes.COMMA)) {
+      this.nextToken();
+      this.nextToken();
+      list.push(this.parseExpression(LOWEST));
+    }
+    if (!this.expectPeek(end)) {
+      return null;
+    }
+    return list;
   }
 
   parseFunctionLiteral() {

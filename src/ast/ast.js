@@ -240,3 +240,22 @@ export class FunctionLiteral extends Expression {
     return out;
   }
 }
+
+export class CallExpression extends Expression {
+  constructor(t = null, f = null, a = []) {
+    super();
+    this.token = t;
+    this.function = f;
+    this.arguments = a;
+  }
+  expressionNode() {}
+  tokenLiteral() {
+    return this.token.literal;
+  }
+  String() {
+    let out = this.function.String() + "(";
+    out += this.arguments.map((a) => a.String()).join(", ");
+    out += ")";
+    return out;
+  }
+}
