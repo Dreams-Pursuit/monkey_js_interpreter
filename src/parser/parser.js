@@ -111,6 +111,7 @@ export class Parser {
       return null;
     }
     lit.body = this.parseBlockStatement();
+    console.log(lit);
     return lit;
   }
 
@@ -161,7 +162,7 @@ export class Parser {
   parseBlockStatement() {
     const block = new BlockStatement(this.curToken);
     this.nextToken();
-    while (!this.curTokenIs(TokenTypes.RBRACE)) {
+    while (!this.curTokenIs(TokenTypes.RBRACE) && !this.curTokenIs(TokenTypes.EOF)) {
       const stmt = this.parseStatement();
       if (stmt !== null) {
         block.statements.push(stmt);
@@ -181,17 +182,7 @@ export class Parser {
   parseBoolean() {
     return new Boolean(this.curToken, this.curTokenIs(TokenTypes.TRUE));
   }
-  //   parseInfixExpression(left) {
-  //     const expression = new InfixExpression(
-  //       this.curToken,
-  //       left,
-  //       this.curToken.literal,
-  //     );
-  //     const precedence = this.curPrecedence();
-  //     this.nextToken();
-  //     expression.right = this.parseExpression(precedence);
-  //     return expression;
-  //   }
+
   parseInfixExpression(left) {
     const operator = this.curToken.literal;
     const precedence = this.curPrecedence();

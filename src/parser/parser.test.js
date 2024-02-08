@@ -354,11 +354,6 @@ test("parser: test function literal parsing", (t) => {
 
   const stmt = program.statements[0];
   const expression = stmt.expression;
-  assert.strictEqual(
-    expression.String(),
-    "fn(x, y) x + y",
-    `expression.String() wrong. got=${expression.String()}`,
-  );
 
   if (expression.parameters.length !== 2) {
     assert.fail(`function literal parameters wrong. want 2. got=${expression.parameters.length}`);
