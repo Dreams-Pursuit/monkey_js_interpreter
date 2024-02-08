@@ -15,6 +15,18 @@ const NULL_OBJ = "NULL";
 // const ARRAY_OBJ = "ARRAY";
 // const HASH_OBJ = "HASH";
 
+export const ObjectTypeMap = {
+  INTEGER: "Integer",
+  BOOLEAN: "Boolean",
+  NULL: "Null",
+  // RETURN_VALUE: "ReturnValue",
+  // ERROR: "Error",
+  // FUNCTION: "Function",
+  // STRING: "String",
+  // BUILTIN: "Builtin",
+  // ARRAY: "Array",
+  // HASH: "Hash",
+};
 export class Integer extends ObjectType {
   constructor(value = 0) {
     super();
