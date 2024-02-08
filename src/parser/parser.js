@@ -10,6 +10,7 @@ import {
   InfixExpression,
 } from "../ast/ast.js";
 import { TokenTypes } from "../token/token.js";
+// import { trace, untrace } from "./parser_tracing.js";
 
 const LOWEST = 1;
 const EQUALS = 2;
@@ -114,6 +115,8 @@ export class Parser {
   }
 
   parseIntegerLiteral() {
+    // trace("parseIntegerLiteral");
+    // untrace("parseIntegerLiteral");
     return new IntegerLiteral(this.curToken, this.curToken.literal);
   }
 
@@ -131,14 +134,17 @@ export class Parser {
     }
   }
   parseExpressionStatement() {
+    // trace("parseExpressionStatement");
     const stmt = new ExpressionStatement(this.curToken);
     stmt.expression = this.parseExpression(LOWEST);
     if (this.peekTokenIs(TokenTypes.SEMICOLON)) {
       this.nextToken();
     }
+    // untrace("parseExpressionStatement");
     return stmt;
   }
   parseExpression(precedence) {
+    // trace("parseExpression");
     const prefix = this.prefixParseFns[this.curToken.tokenType];
 
     if (prefix === undefined) {
@@ -157,7 +163,7 @@ export class Parser {
       this.nextToken();
       leftExp = infix.bind(this)(leftExp);
     }
-
+    // untrace("parseExpression");
     return leftExp;
   }
   peekPrecedence() {
