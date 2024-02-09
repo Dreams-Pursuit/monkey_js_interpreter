@@ -4,6 +4,7 @@ import { Lexer } from "../lexer/lexer.js";
 import { Parser } from "../parser/parser.js";
 import { evaluate } from "./evaluator.js";
 import { ObjectTypeMap } from "../object/object.js";
+import { Enviroment } from "../object/enviroment.js";
 
 test("evaluator: integer expression", () => {
   const tests = [
@@ -35,7 +36,9 @@ function testEval(input) {
   const lexer = new Lexer(input);
   const parser = new Parser(lexer);
   const program = parser.parseProgram();
-  return evaluate(program);
+  const env = new Enviroment();
+
+  return evaluate(program, env);
 }
 
 function testIntegerObject(obj, expected) {
@@ -67,7 +70,6 @@ test("evaluator: boolean expression", () => {
 
   for (const [input, expected] of tests) {
     const evaluated = testEval(input);
-    console.log(evaluated);
     testBooleanObject(evaluated, expected);
   }
 });
@@ -142,14 +144,27 @@ test("evaluator: error handling", () => {
     ["5; true + false; 5", "unknown operator: BOOLEAN + BOOLEAN"],
     ["if (10 > 1) { true + false; }", "unknown operator: BOOLEAN + BOOLEAN"],
     ["if (10 > 1) { if (10 > 1) { return true + false; } return 1; }", "unknown operator: BOOLEAN + BOOLEAN"],
+    ["foobar", "identifier not found: foobar"],
   ];
 
   for (const [input, expected] of tests) {
     const evaluated = testEval(input);
     if (evaluated !== null) {
-      console.log(evaluated);
       assert.strictEqual(evaluated.Type(), ObjectTypeMap.ERROR);
       assert.strictEqual(evaluated.message, expected);
     }
+  }
+});
+
+test("evaluator: let statements", () => {
+  const tests = [
+    ["let a = 5; a;", 5],
+    ["let a = 5 * 5; a;", 25],
+    ["let a = 5; let b = a; b;", 5],
+    ["let a = 5; let b = a; let c = a + b + 5; c;", 15],
+  ];
+
+  for (const [input, expected] of tests) {
+    testIntegerObject(testEval(input), expected);
   }
 });

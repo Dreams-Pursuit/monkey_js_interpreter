@@ -2,6 +2,7 @@ import readline from "readline";
 import { Lexer } from "../lexer/lexer.js";
 import { Parser } from "../parser/parser.js";
 import { evaluate } from "../evaluator/evaluator.js";
+import { Enviroment } from "../object/enviroment.js";
 // import { TokenTypes } from "../token/token.js";
 
 const PROMPT = ">> ";
@@ -14,6 +15,7 @@ export function startREPL() {
     terminal: false,
   });
 
+  const env = new Enviroment();
 
   rl.on("line", (line) => {
     const lexer = new Lexer(line);
@@ -25,7 +27,7 @@ export function startREPL() {
       return;
     }
 
-    const evaluated = evaluate(program);
+    const evaluated = evaluate(program, env);
     if (evaluated !== null) {
       console.log(evaluated.Inspect());
     }

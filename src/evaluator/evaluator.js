@@ -8,23 +8,26 @@ import {
   BlockStatement,
   IfExpression,
   ReturnStatement,
+  LetStatement,
+  Identifier,
 } from "../ast/ast.js";
-import { Integer, BooleanType, Null, ReturnValue, Error } from "../object/object.js";
+import { Integer, BooleanType, Null, ReturnValue, ErrorN } from "../object/object.js";
+import { Enviroment } from "../object/enviroment.js";
 import { ObjectTypeMap } from "../object/object.js";
 
 const TRUE = new BooleanType(true);
 const FALSE = new BooleanType(false);
 const NULL = new Null();
 
-export function evaluate(node) {
+export function evaluate(node, env = new Enviroment()) {
 
   let left, right, val;
   switch (node.constructor) {
   case Program:
-    return evalProgram(node);
+    return evalProgram(node, env);
 
   case ExpressionStatement:
-    return evaluate(node.expression);
+    return evaluate(node.expression, env);
 
   case IntegerLiteral:
     return new Integer(node.value);
@@ -33,33 +36,52 @@ export function evaluate(node) {
     return nativeBoolToBooleanObject(node.value);
 
   case PrefixExpression:
-    right = evaluate(node.right);
+    right = evaluate(node.right, env);
+    if (isError(right)) return right;
     return evaluatePrefixExpression(node.operator, right);
 
   case InfixExpression:
-    left = evaluate(node.left);
-    right = evaluate(node.right);
+    left = evaluate(node.left, env);
+    right = evaluate(node.right, env);
+    if (isError(left)) return left;
+    if (isError(right)) return right;
     return evaluateInfixExpression(node.operator, left, right);
 
   case BlockStatement:
-    return evalBlockStatement(node);
+    return evalBlockStatement(node, env);
 
   case IfExpression:
-    return evaluateIfExpression(node);
+    return evaluateIfExpression(node, env);
 
   case ReturnStatement:
-    val = evaluate(node.returnValue);
+    val = evaluate(node.returnValue, env);
     if (isError(val)) return val;
     return new ReturnValue(val);
+
+  case LetStatement:
+    val = evaluate(node.value, env);
+    if (isError(val)) return val;
+    env.set(node.name.value, val);
+    return NULL;
+
+  case Identifier:
+    return evalIdentifier(node, env);
   }
 
-  return null;
+  return NULL;
 }
 
-function evalBlockStatement(block) {
+
+function evalIdentifier(node, env) {
+  const val = env.get(node.value);
+  if (val !== undefined) return val;
+  return new ErrorN(`identifier not found: ${node.value}`);
+}
+
+function evalBlockStatement(block, env) {
   let result;
   for (const statement of block.statements) {
-    result = evaluate(statement);
+    result = evaluate(statement, env);
 
     if (result !== null) {
       const type = result.Type();
@@ -69,10 +91,10 @@ function evalBlockStatement(block) {
   return result;
 }
 
-function evalProgram(program) {
+function evalProgram(program, env) {
   let result;
   for (const statement of program.statements) {
-    result = evaluate(statement);
+    result = evaluate(statement, env);
     switch (result.Type()) {
     case ObjectTypeMap.RETURN_VALUE:
       return result.value;
@@ -83,8 +105,8 @@ function evalProgram(program) {
   return result;
 }
 
-function evaluateIfExpression(ie) {
-  const condition = evaluate(ie.condition);
+function evaluateIfExpression(ie, env) {
+  const condition = evaluate(ie.condition, env);
   if (isError(condition)) return condition;
   if (isTruthy(condition)) return evaluate(ie.consequence);
   if (ie.alternative !== null) return evaluate(ie.alternative);
@@ -111,9 +133,9 @@ function evaluateInfixExpression(operator, left, right) {
   if (operator === "==") return nativeBoolToBooleanObject(left === right);
   if (operator === "!=") return nativeBoolToBooleanObject(left !== right);
 
-  if (left.Type() !== right.Type()) return new Error(`type mismatch: ${left.Type()} ${operator} ${right.Type()}`);
+  if (left.Type() !== right.Type()) return new ErrorN(`type mismatch: ${left.Type()} ${operator} ${right.Type()}`);
 
-  return new Error(`unknown operator: ${left.Type()} ${operator} ${right.Type()}`);
+  return new ErrorN(`unknown operator: ${left.Type()} ${operator} ${right.Type()}`);
 }
 
 function evaluateIntegerInfixExpression(operator, left, right) {
@@ -137,7 +159,7 @@ function evaluateIntegerInfixExpression(operator, left, right) {
   case "!=":
     return nativeBoolToBooleanObject(leftVal !== rightVal);
   default:
-    return new Error(`unknown operator: ${left.Type()} ${operator} ${right.Type()}`);
+    return new ErrorN(`unknown operator: ${left.Type()} ${operator} ${right.Type()}`);
   }
 }
 
@@ -148,7 +170,7 @@ function evaluatePrefixExpression(operator, right) {
   case "-":
     return evaluateMinusPrefixOperatorExpression(right);
   default:
-    return new Error(`unknown operator: ${operator}${right.Type()}`);
+    return new ErrorN(`unknown operator: ${operator}${right.Type()}`);
   }
 }
 
@@ -160,7 +182,7 @@ function evaluateBangOperatorExpression(right) {
 }
 
 function evaluateMinusPrefixOperatorExpression(right) {
-  if (right.Type() !== ObjectTypeMap.INTEGER) return new Error(`unknown operator: -${right.Type()}`);
+  if (right.Type() !== ObjectTypeMap.INTEGER) return new ErrorN(`unknown operator: -${right.Type()}`);
   const value = right.value;
   return new Integer(-value);
 }

@@ -75,7 +75,7 @@ export class ReturnValue extends ObjectType {
   }
 }
 
-export class Error extends ObjectType {
+export class ErrorN extends ObjectType {
   constructor(message = "") {
     super();
     this.message = message;
