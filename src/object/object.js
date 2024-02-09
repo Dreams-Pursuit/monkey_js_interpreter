@@ -7,7 +7,7 @@ export class ObjectType {
 const INTEGER_OBJ = "INTEGER";
 const BOOLEAN_OBJ = "BOOLEAN";
 const NULL_OBJ = "NULL";
-// const RETURN_VALUE_OBJ = "RETURN_VALUE";
+const RETURN_VALUE_OBJ = "RETURN_VALUE";
 // const ERROR_OBJ = "ERROR";
 // const FUNCTION_OBJ = "FUNCTION";
 // const STRING_OBJ = "STRING";
@@ -19,7 +19,7 @@ export const ObjectTypeMap = {
   INTEGER: "INTEGER",
   BOOLEAN: "BOOLEAN",
   NULL: "NULL",
-  // RETURN_VALUE: "RETURN_VALUE",
+  RETURN_VALUE: "RETURN_VALUE",
   // ERROR: "ERROR",
   // FUNCTION: "FUNCTION",
   // STRING: "STRING",
@@ -59,5 +59,18 @@ export class Null extends ObjectType {
   }
   Inspect() {
     return null;
+  }
+}
+
+export class ReturnValue extends ObjectType {
+  constructor(value = null) {
+    super();
+    this.value = value;
+  }
+  Type() {
+    return RETURN_VALUE_OBJ;
+  }
+  Inspect() {
+    return this.value.Inspect();
   }
 }

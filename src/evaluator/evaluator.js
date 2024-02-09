@@ -7,8 +7,9 @@ import {
   InfixExpression,
   BlockStatement,
   IfExpression,
+  ReturnStatement,
 } from "../ast/ast.js";
-import { Integer, BooleanType, Null } from "../object/object.js";
+import { Integer, BooleanType, Null, ReturnValue } from "../object/object.js";
 import { ObjectTypeMap } from "../object/object.js";
 
 const TRUE = new BooleanType(true);
@@ -17,10 +18,10 @@ const NULL = new Null();
 
 export function evaluate(node) {
 
-  let left, right;
+  let left, right, val;
   switch (node.constructor) {
   case Program:
-    return evaluateStatements(node.statements);
+    return evalProgram(node);
 
   case ExpressionStatement:
     return evaluate(node.expression);
@@ -39,15 +40,40 @@ export function evaluate(node) {
     left = evaluate(node.left);
     right = evaluate(node.right);
     return evaluateInfixExpression(node.operator, left, right);
+
   case BlockStatement:
-    return evaluateStatements(node.statements);
+    return evalBlockStatement(node);
+
   case IfExpression:
     return evaluateIfExpression(node);
+
+  case ReturnStatement:
+    val = evaluate(node.returnValue);
+    if (isError(val)) return val;
+    return new ReturnValue(val);
   }
 
   return null;
 }
 
+function evalBlockStatement(block) {
+  let result;
+  for (const statement of block.statements) {
+    result = evaluate(statement);
+    if (result !== null && result.Type() === ObjectTypeMap.RETURN_VALUE) 
+      return result;
+  }
+  return result;
+}
+
+function evalProgram(program) {
+  let result;
+  for (const statement of program.statements) {
+    result = evaluate(statement);
+    if (result.Type() === ObjectTypeMap.RETURN_VALUE) return result.value;
+  }
+  return result;
+}
 
 function evaluateIfExpression(ie) {
   const condition = evaluate(ie.condition);
@@ -130,13 +156,14 @@ function evaluateMinusPrefixOperatorExpression(right) {
   const value = right.value;
   return new Integer(-value);
 }
-function evaluateStatements(statements) {
-  let result;
-  for (const statement of statements) {
-    result = evaluate(statement);
-  }
-  return result;
-}
+// function evaluateStatements(statements) {
+//   let result;
+//   for (const statement of statements) {
+//     result = evaluate(statement);
+//     if (result.Type() === ObjectTypeMap.RETURN_VALUE) return result.value;
+//   }
+//   return result;
+// }
 
 function nativeBoolToBooleanObject(input) {
   return input ? TRUE : FALSE;
