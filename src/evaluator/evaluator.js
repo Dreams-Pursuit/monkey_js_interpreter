@@ -10,8 +10,10 @@ import {
   ReturnStatement,
   LetStatement,
   Identifier,
+  FunctionLiteral,
+  CallExpression,
 } from "../ast/ast.js";
-import { Integer, BooleanType, Null, ReturnValue, ErrorN } from "../object/object.js";
+import { Integer, BooleanType, Null, ReturnValue, ErrorN, Function } from "../object/object.js";
 import { Enviroment } from "../object/enviroment.js";
 import { ObjectTypeMap } from "../object/object.js";
 
@@ -22,6 +24,7 @@ const NULL = new Null();
 export function evaluate(node, env = new Enviroment()) {
 
   let left, right, val;
+  let func, args;
   switch (node.constructor) {
   case Program:
     return evalProgram(node, env);
@@ -66,11 +69,50 @@ export function evaluate(node, env = new Enviroment()) {
 
   case Identifier:
     return evalIdentifier(node, env);
+
+  case FunctionLiteral:
+    return new Function(node.parameters, node.body, env);
+
+  case CallExpression:
+    func = evaluate(node.function, env);
+    if (isError(func)) return func;
+    args = evalExpressions(node.arguments, env);
+    if (args.length === 1 && isError(args[0])) return args[0];
+    return applyFunction(func, args);
   }
 
   return NULL;
 }
 
+function applyFunction(fn, args) {
+  if (fn.constructor !== Function) return new ErrorN(`not a function: ${fn.Type()}`);
+  const extendedEnv = extendFunctionEnv(fn, args);
+  const evaluated = evaluate(fn.body, extendedEnv);
+  return unwrapReturnValue(evaluated);
+}
+
+function extendFunctionEnv(fn, args) {
+  const env = new Enviroment(fn.env);
+  for (let i = 0; i < fn.parameters.length; i++) {
+    env.set(fn.parameters[i].value, args[i]);
+  }
+  return env;
+}
+
+function unwrapReturnValue(obj) {
+  if (obj.constructor === ReturnValue) return obj.value;
+  return obj;
+}
+
+function evalExpressions(exps, env) {
+  const result = [];
+  for (const e of exps) {
+    const evaluated = evaluate(e, env);
+    if (isError(evaluated)) return [evaluated];
+    result.push(evaluated);
+  }
+  return result;
+}
 
 function evalIdentifier(node, env) {
   const val = env.get(node.value);

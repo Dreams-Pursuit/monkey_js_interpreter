@@ -168,3 +168,38 @@ test("evaluator: let statements", () => {
     testIntegerObject(testEval(input), expected);
   }
 });
+
+test("evaluator: function object", () => {
+  const input = "fn(x) { x + 2; };";
+  const evaluated = testEval(input);
+  assert.strictEqual(evaluated.parameters.length, 1);
+  assert.strictEqual(evaluated.parameters[0].value, "x");
+  assert.strictEqual(evaluated.body.statements.length, 1);
+  assert.strictEqual(evaluated.body.String(), "(x + 2)");
+});
+
+test("evaluator: function application", () => {
+  const tests = [
+    ["let identity = fn(x) { x; }; identity(5);", 5],
+    ["let identity = fn(x) { return x; }; identity(5);", 5],
+    ["let double = fn(x) { x * 2; }; double(5);", 10],
+    ["let add = fn(x, y) { x + y; }; add(5, 5);", 10],
+    ["let add = fn(x, y) { x + y; }; add(5 + 5, add(5, 5));", 20],
+    ["fn(x) { x; }(5)", 5],
+  ];
+
+  for (const [input, expected] of tests) {
+    testIntegerObject(testEval(input), expected);
+  }
+});
+
+test("evaluator: closures", () => {
+  const input = `
+  let newAdder = fn(x) {
+    fn(y) { x + y };
+  };
+  let addTwo = newAdder(2);
+  addTwo(2);
+  `;
+  testIntegerObject(testEval(input), 4);
+});

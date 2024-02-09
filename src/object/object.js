@@ -9,7 +9,7 @@ const BOOLEAN_OBJ = "BOOLEAN";
 const NULL_OBJ = "NULL";
 const RETURN_VALUE_OBJ = "RETURN_VALUE";
 const ERROR_OBJ = "ERROR";
-// const FUNCTION_OBJ = "FUNCTION";
+const FUNCTION_OBJ = "FUNCTION";
 // const STRING_OBJ = "STRING";
 // const BUILTIN_OBJ = "BUILTIN";
 // const ARRAY_OBJ = "ARRAY";
@@ -21,7 +21,7 @@ export const ObjectTypeMap = {
   NULL: "NULL",
   RETURN_VALUE: "RETURN_VALUE",
   ERROR: "ERROR",
-  // FUNCTION: "FUNCTION",
+  FUNCTION: "FUNCTION",
   // STRING: "STRING",
   // BUILTIN: "BUILTIN",
   // ARRAY: "ARRAY",
@@ -85,5 +85,20 @@ export class ErrorN extends ObjectType {
   }
   Inspect() {
     return `ERROR: ${this.message}`;
+  }
+}
+
+export class Function extends ObjectType {
+  constructor(parameters = [], body = [], env = null) {
+    super();
+    this.parameters = parameters;
+    this.body = body;
+    this.env = env;
+  }
+  Type() {
+    return FUNCTION_OBJ;
+  }
+  Inspect() {
+    return `fn(${this.parameters.map((p) => p.Inspect()).join(", ")}) {\n${this.body.map((b) => b.Inspect()).join("\n")}\n}`;
   }
 }
