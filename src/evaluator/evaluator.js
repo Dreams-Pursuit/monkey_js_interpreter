@@ -5,6 +5,8 @@ import {
   Boolean,
   PrefixExpression,
   InfixExpression,
+  BlockStatement,
+  IfExpression,
 } from "../ast/ast.js";
 import { Integer, BooleanType, Null } from "../object/object.js";
 import { ObjectTypeMap } from "../object/object.js";
@@ -32,13 +34,39 @@ export function evaluate(node) {
   case PrefixExpression:
     right = evaluate(node.right);
     return evaluatePrefixExpression(node.operator, right);
+
   case InfixExpression:
     left = evaluate(node.left);
     right = evaluate(node.right);
     return evaluateInfixExpression(node.operator, left, right);
+  case BlockStatement:
+    return evaluateStatements(node.statements);
+  case IfExpression:
+    return evaluateIfExpression(node);
   }
 
   return null;
+}
+
+
+function evaluateIfExpression(ie) {
+  const condition = evaluate(ie.condition);
+  if (isError(condition)) return condition;
+  if (isTruthy(condition)) return evaluate(ie.consequence);
+  if (ie.alternative !== null) return evaluate(ie.alternative);
+  return NULL;
+}
+
+function isError(obj) {
+  if (obj !== null) return obj.Type() === ObjectTypeMap.ERROR;
+  return false;
+}
+
+function isTruthy(obj) {
+  if (obj === NULL) return false;
+  if (obj === TRUE) return true;
+  if (obj === FALSE) return false;
+  return true;
 }
 
 function evaluateInfixExpression(operator, left, right) {

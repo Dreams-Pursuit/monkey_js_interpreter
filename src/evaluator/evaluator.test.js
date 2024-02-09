@@ -92,3 +92,28 @@ test("evaluator: bang operator", () => {
     testBooleanObject(evaluated, expected);
   }
 });
+
+test("evaluator: if else expressions", () => {
+  const tests = [
+    ["if (true) { 10 }", 10],
+    ["if (false) { 10 }", null],
+    ["if (1) { 10 }", 10],
+    ["if (1 < 2) { 10 }", 10],
+    ["if (1 > 2) { 10 }", null],
+    ["if (1 > 2) { 10 } else { 20 }", 20],
+    ["if (1 < 2) { 10 } else { 20 }", 10],
+  ];
+
+  for (const [input, expected] of tests) {
+    const evaluated = testEval(input);
+    if (expected === null) {
+      testNullObject(evaluated);
+    } else {
+      testIntegerObject(evaluated, expected);
+    }
+  }
+});
+
+function testNullObject(obj) {
+  if (obj !== null) assert.strictEqual(obj.Type(), ObjectTypeMap.NULL);
+}
