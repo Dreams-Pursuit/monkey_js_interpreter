@@ -40,7 +40,7 @@ export class Integer extends ObjectType {
   }
 }
 
-export class Boolean extends ObjectType {
+export class BooleanType extends ObjectType {
   constructor(value = false) {
     super();
     this.value = value;

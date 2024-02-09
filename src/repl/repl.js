@@ -11,6 +11,7 @@ export function startREPL() {
     input: process.stdin,
     output: process.stdout,
     prompt: PROMPT,
+    terminal: false,
   });
 
 
