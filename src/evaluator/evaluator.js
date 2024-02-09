@@ -9,7 +9,7 @@ import {
   IfExpression,
   ReturnStatement,
 } from "../ast/ast.js";
-import { Integer, BooleanType, Null, ReturnValue } from "../object/object.js";
+import { Integer, BooleanType, Null, ReturnValue, Error } from "../object/object.js";
 import { ObjectTypeMap } from "../object/object.js";
 
 const TRUE = new BooleanType(true);
@@ -60,8 +60,11 @@ function evalBlockStatement(block) {
   let result;
   for (const statement of block.statements) {
     result = evaluate(statement);
-    if (result !== null && result.Type() === ObjectTypeMap.RETURN_VALUE) 
-      return result;
+
+    if (result !== null) {
+      const type = result.Type();
+      if (type === ObjectTypeMap.RETURN_VALUE || type === ObjectTypeMap.ERROR) return result;
+    }
   }
   return result;
 }
@@ -70,7 +73,12 @@ function evalProgram(program) {
   let result;
   for (const statement of program.statements) {
     result = evaluate(statement);
-    if (result.Type() === ObjectTypeMap.RETURN_VALUE) return result.value;
+    switch (result.Type()) {
+    case ObjectTypeMap.RETURN_VALUE:
+      return result.value;
+    case ObjectTypeMap.ERROR:
+      return result;
+    }
   }
   return result;
 }
@@ -105,7 +113,7 @@ function evaluateInfixExpression(operator, left, right) {
 
   if (left.Type() !== right.Type()) return NULL;
 
-  return NULL;
+  return new Error(`unknown operator: ${left.Type()} ${operator} ${right.Type()}`);
 }
 
 function evaluateIntegerInfixExpression(operator, left, right) {
@@ -129,7 +137,7 @@ function evaluateIntegerInfixExpression(operator, left, right) {
   case "!=":
     return nativeBoolToBooleanObject(leftVal !== rightVal);
   default:
-    return NULL;
+    return new Error(`unknown operator: ${left.Type()} ${operator} ${right.Type()}`);
   }
 }
 
@@ -140,7 +148,7 @@ function evaluatePrefixExpression(operator, right) {
   case "-":
     return evaluateMinusPrefixOperatorExpression(right);
   default:
-    return NULL;
+    return new Error(`unknown operator: ${operator}${right.Type()}`);
   }
 }
 
@@ -152,18 +160,10 @@ function evaluateBangOperatorExpression(right) {
 }
 
 function evaluateMinusPrefixOperatorExpression(right) {
-  if (right.Type() !== ObjectTypeMap.INTEGER) return NULL;
+  if (right.Type() !== ObjectTypeMap.INTEGER) return new Error(`unknown operator: -${right.Type()}`);
   const value = right.value;
   return new Integer(-value);
 }
-// function evaluateStatements(statements) {
-//   let result;
-//   for (const statement of statements) {
-//     result = evaluate(statement);
-//     if (result.Type() === ObjectTypeMap.RETURN_VALUE) return result.value;
-//   }
-//   return result;
-// }
 
 function nativeBoolToBooleanObject(input) {
   return input ? TRUE : FALSE;
