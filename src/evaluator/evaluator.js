@@ -111,7 +111,7 @@ function evaluateInfixExpression(operator, left, right) {
   if (operator === "==") return nativeBoolToBooleanObject(left === right);
   if (operator === "!=") return nativeBoolToBooleanObject(left !== right);
 
-  if (left.Type() !== right.Type()) return NULL;
+  if (left.Type() !== right.Type()) return new Error(`type mismatch: ${left.Type()} ${operator} ${right.Type()}`);
 
   return new Error(`unknown operator: ${left.Type()} ${operator} ${right.Type()}`);
 }
