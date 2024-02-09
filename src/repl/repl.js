@@ -1,6 +1,7 @@
 import readline from "readline";
 import { Lexer } from "../lexer/lexer.js";
 import { Parser } from "../parser/parser.js";
+import { evaluate } from "../evaluator/evaluator.js";
 // import { TokenTypes } from "../token/token.js";
 
 const PROMPT = ">> ";
@@ -20,9 +21,14 @@ export function startREPL() {
 
     if (parser.errors.length > 0) {
       printParserErrors(parser.errors);
+      return;
     }
 
-    console.log(program.String());
+    const evaluated = evaluate(program);
+    if (evaluated !== null) {
+      console.log(evaluated.Inspect());
+    }
+
     rl.prompt();
   });
 

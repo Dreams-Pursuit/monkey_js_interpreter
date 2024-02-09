@@ -1,7 +1,9 @@
 import { IntegerLiteral, Program, ExpressionStatement } from "../ast/ast.js";
+import { Integer } from "../object/object.js";
 
 export function evaluate(node) {
-  switch (node.type) {
+
+  switch (node.constructor) {
   case Program:
     return evaluateStatements(node.statements);
 
@@ -9,7 +11,7 @@ export function evaluate(node) {
     return evaluate(node.expression);
 
   case IntegerLiteral:
-    return node.value;
+    return new Integer(node.value);
   }
 
   return null;

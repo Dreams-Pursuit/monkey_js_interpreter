@@ -16,21 +16,21 @@ const NULL_OBJ = "NULL";
 // const HASH_OBJ = "HASH";
 
 export const ObjectTypeMap = {
-  INTEGER: "Integer",
-  BOOLEAN: "Boolean",
-  NULL: "Null",
-  // RETURN_VALUE: "ReturnValue",
-  // ERROR: "Error",
-  // FUNCTION: "Function",
-  // STRING: "String",
-  // BUILTIN: "Builtin",
-  // ARRAY: "Array",
-  // HASH: "Hash",
+  INTEGER: "INTEGER",
+  BOOLEAN: "BOOLEAN",
+  NULL: "NULL",
+  // RETURN_VALUE: "RETURN_VALUE",
+  // ERROR: "ERROR",
+  // FUNCTION: "FUNCTION",
+  // STRING: "STRING",
+  // BUILTIN: "BUILTIN",
+  // ARRAY: "ARRAY",
+  // HASH: "HASH",
 };
 export class Integer extends ObjectType {
   constructor(value = 0) {
     super();
-    this.value = value;
+    this.value = +value;
   }
   Type() {
     return INTEGER_OBJ;
@@ -58,6 +58,6 @@ export class Null extends ObjectType {
     return NULL_OBJ;
   }
   Inspect() {
-    return "null";
+    return null;
   }
 }

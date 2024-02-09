@@ -137,7 +137,6 @@ export class Parser {
       return null;
     }
     lit.body = this.parseBlockStatement();
-    console.log(lit);
     return lit;
   }
 

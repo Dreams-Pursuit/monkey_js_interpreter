@@ -26,7 +26,7 @@ test("evaluator: integer expression", () => {
 
   for (const [input, expected] of tests) {
     const evaluated = testEval(input);
-    console.log(evaluated);
+    // console.log(evaluated);
     testIntegerObject(evaluated, expected);
   }
 });
