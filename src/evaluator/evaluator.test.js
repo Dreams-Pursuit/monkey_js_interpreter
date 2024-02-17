@@ -218,3 +218,23 @@ test("evaluator: string concatenation", () => {
   assert.strictEqual(evaluated.Type(), ObjectTypeMap.STRING);
   assert.strictEqual(evaluated.value, "hello world!");
 });
+
+test("evaluator: builtin functions", () => {
+  const tests = [
+    ["len(\"\")", 0],
+    ["len(\"four\")", 4],
+    ["len(\"hello world\")", 11],
+    ["len(1)", "argument to `len` not supported, got INTEGER"],
+    ["len(\"one\", \"two\")", "wrong number of arguments. got=2, want=1"],
+  ];
+
+  for (const [input, expected] of tests) {
+    const evaluated = testEval(input);
+    if (typeof expected === "number") {
+      testIntegerObject(evaluated, expected);
+    } else {
+      assert.strictEqual(evaluated.Type(), ObjectTypeMap.ERROR);
+      assert.strictEqual(evaluated.message, expected);
+    }
+  }
+});

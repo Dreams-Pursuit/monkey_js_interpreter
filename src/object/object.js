@@ -10,8 +10,8 @@ const NULL_OBJ = "NULL";
 const RETURN_VALUE_OBJ = "RETURN_VALUE";
 const ERROR_OBJ = "ERROR";
 const FUNCTION_OBJ = "FUNCTION";
-// const STRING_OBJ = "STRING";
-// const BUILTIN_OBJ = "BUILTIN";
+const STRING_OBJ = "STRING";
+const BUILTIN_OBJ = "BUILTIN";
 // const ARRAY_OBJ = "ARRAY";
 // const HASH_OBJ = "HASH";
 
@@ -109,9 +109,23 @@ export class String extends ObjectType {
     this.value = value;
   }
   Type() {
-    return ObjectTypeMap.STRING;
+    return STRING_OBJ;
   }
   Inspect() {
     return this.value;
+  }
+}
+
+export class Builtin extends ObjectType {
+  constructor(fn = (() => {})) {
+    super();
+    this.fn = fn;
+    // console.log(typeof this.fn, this.fn);
+  }
+  Type() {
+    return BUILTIN_OBJ;
+  }
+  Inspect() {
+    return "builtin function";
   }
 }

@@ -14,9 +14,10 @@ import {
   CallExpression,
   StringLiteral,
 } from "../ast/ast.js";
-import { Integer, BooleanType, Null, ReturnValue, ErrorN, Function, String } from "../object/object.js";
+import { Integer, BooleanType, Null, ReturnValue, ErrorN, Function, String, Builtin } from "../object/object.js";
 import { Enviroment } from "../object/enviroment.js";
 import { ObjectTypeMap } from "../object/object.js";
+import { builtins } from "./builtins.js";
 
 const TRUE = new BooleanType(true);
 const FALSE = new BooleanType(false);
@@ -88,10 +89,19 @@ export function evaluate(node, env = new Enviroment()) {
 }
 
 function applyFunction(fn, args) {
-  if (fn.constructor !== Function) return new ErrorN(`not a function: ${fn.Type()}`);
-  const extendedEnv = extendFunctionEnv(fn, args);
-  const evaluated = evaluate(fn.body, extendedEnv);
-  return unwrapReturnValue(evaluated);
+  let extendedEnv, evaluated;
+  switch (fn.constructor) {
+  case Function:
+    extendedEnv = extendFunctionEnv(fn, args);
+    evaluated = evaluate(fn.body, extendedEnv);
+    return unwrapReturnValue(evaluated);
+  case Builtin:
+    return fn.fn(...args);
+  case ReturnValue:
+    return fn.value;
+  default:
+    return new ErrorN(`not a function: ${fn.Type()}`);
+  }
 }
 
 function extendFunctionEnv(fn, args) {
@@ -120,6 +130,7 @@ function evalExpressions(exps, env) {
 function evalIdentifier(node, env) {
   const val = env.get(node.value);
   if (val !== undefined) return val;
+  if (builtins[node.value] !== undefined) return builtins[node.value];
   return new ErrorN(`identifier not found: ${node.value}`);
 }
 
