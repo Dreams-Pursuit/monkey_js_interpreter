@@ -130,6 +130,12 @@ export class Lexer {
       tok.tokenType = TokenTypes.STRING;
       tok.literal = this.readString();
       break;
+    case "[":
+      tok = new Token(TokenTypes.LBRACKET, this.ch);
+      break;
+    case "]":
+      tok = new Token(TokenTypes.RBRACKET, this.ch);
+      break;
     case "\0":
       tok = new Token(TokenTypes.EOF, "");
       break;

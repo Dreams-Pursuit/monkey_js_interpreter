@@ -220,6 +220,9 @@ test("parser: test operator precedence parsing", (t) => {
     { input: "!(true == true)", expected: "(!(true == true))" },
     { input: "a + add(b * c) + d", expected: "((a + add((b * c))) + d)" },
     { input: "add(a, b, 1, 2 * 3, 4 + 5, add(6, 7 * 8))", expected: "add(a, b, 1, (2 * 3), (4 + 5), add(6, (7 * 8)))" },
+    // { input: "add(a + b + c * d / f + g)", expected: "add((((a + b) + ((c * d) / f)) + g))" },
+    { input: "a * [1, 2, 3, 4][b * c] * d", expected: "((a * ([1, 2, 3, 4][(b * c)])) * d)" },
+    { input: "add(a * b[2], b[1], 2 * [1, 2][1])", expected: "add((a * (b[2])), (b[1]), (2 * ([1, 2][1])))"}
   ];
 
   tests.forEach((tt) => {
@@ -438,4 +441,35 @@ test("parser: test string literal expression", (t) => {
   const stmt = program.statements[0];
   const literal = stmt.expression;
   assert.strictEqual(literal.value, "hello world", `literal.Value not "hello world". got=${literal.value}`);
+});
+
+test("parser: test array literal parsing", (t) => {
+  const input = "[1, 2 * 2, 3 + 3]";
+  const l = new Lexer(input);
+  const p = new Parser(l);
+  const program = p.parseProgram();
+  checkParserErrors(t, p);
+
+  const stmt = program.statements[0];
+  const array = stmt.expression;
+  if (array.elements.length !== 3) {
+    assert.fail(`array.Elements wrong length. got=${array.elements.length}`);
+  }
+  testIntegralLiteral(t, array.elements[0], 1);
+  testInfixExpression(t, array.elements[1], { type: "integer", value: 2 }, "*", { type: "integer", value: 2 });
+  testInfixExpression(t, array.elements[2], { type: "integer", value: 3 }, "+", { type: "integer", value: 3 });
+
+});
+
+test("parser: tesr parsing index expressions", (t) => {
+  const input = "myArray[1 + 1]";
+  const l = new Lexer(input);
+  const p = new Parser(l);
+  const program = p.parseProgram();
+  checkParserErrors(t, p);
+
+  const stmt = program.statements[0];
+  const indexExp = stmt.expression;
+  testIdentifier(t, indexExp.left, "myArray");
+  testInfixExpression(t, indexExp.index, { type: "integer", value: 1 }, "+", { type: "integer", value: 1 });
 });

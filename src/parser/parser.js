@@ -14,6 +14,8 @@ import {
   FunctionLiteral,
   CallExpression,
   StringLiteral,
+  ArrayLiteral,
+  IndexExpression,
 } from "../ast/ast.js";
 import { TokenTypes } from "../token/token.js";
 // import { trace, untrace } from "./parser_tracing.js";
@@ -25,6 +27,7 @@ const SUM = 4;
 const PRODUCT = 5;
 const PREFIX = 6;
 const CALL = 7;
+const INDEX = 8;
 
 const precedences = {
   [TokenTypes.EQ]: EQUALS,
@@ -36,6 +39,7 @@ const precedences = {
   [TokenTypes.SLASH]: PRODUCT,
   [TokenTypes.ASTERISK]: PRODUCT,
   [TokenTypes.LPAREN]: CALL,
+  [TokenTypes.LBRACKET]: INDEX,
 };
 
 export class Parser {
@@ -58,6 +62,7 @@ export class Parser {
     this.registerPrefix(TokenTypes.IF, this.parseIfExpression);
     this.registerPrefix(TokenTypes.FUNCTION, this.parseFunctionLiteral);
     this.registerPrefix(TokenTypes.STRING, this.parseStringLiteral);
+    this.registerPrefix(TokenTypes.LBRACKET, this.parseArrayLiteral);
 
     this.registerInfix(TokenTypes.PLUS, this.parseInfixExpression);
     this.registerInfix(TokenTypes.MINUS, this.parseInfixExpression);
@@ -68,6 +73,7 @@ export class Parser {
     this.registerInfix(TokenTypes.LT, this.parseInfixExpression);
     this.registerInfix(TokenTypes.GT, this.parseInfixExpression);
     this.registerInfix(TokenTypes.LPAREN, this.parseCallExpression);
+    this.registerInfix(TokenTypes.LBRACKET, this.parseIndexExpression);
 
     this.nextToken();
     this.nextToken();
@@ -105,6 +111,20 @@ export class Parser {
     return program;
   }
 
+  parseIndexExpression(left) {
+    const exp = new IndexExpression(this.curToken, left);
+    this.nextToken();
+    exp.index = this.parseExpression(LOWEST);
+    if (!this.expectPeek(TokenTypes.RBRACKET)) {
+      return null;
+    }
+    return exp;
+  }
+  parseArrayLiteral() {
+    const array = new ArrayLiteral(this.curToken);
+    array.elements = this.parseExpressionList(TokenTypes.RBRACKET);
+    return array;
+  }
   parseStringLiteral() {
     return new StringLiteral(this.curToken, this.curToken.literal);
   }

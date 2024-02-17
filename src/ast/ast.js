@@ -274,3 +274,37 @@ export class StringLiteral extends Expression {
     return this.token.literal;
   }
 }
+
+export class ArrayLiteral extends Expression {
+  constructor(t = null, e = []) {
+    super();
+    this.token = t;
+    this.elements = e;
+  }
+  expressionNode() {}
+  tokenLiteral() {
+    return this.token.literal;
+  }
+  String() {
+    let out = "[";
+    out += this.elements.map((e) => e.String()).join(", ");
+    out += "]";
+    return out;
+  }
+}
+
+export class IndexExpression extends Expression {
+  constructor(t = null, l = null, i = null) {
+    super();
+    this.token = t;
+    this.left = l;
+    this.index = i;
+  }
+  expressionNode() {}
+  tokenLiteral() {
+    return this.token.literal;
+  }
+  String() {
+    return `(${this.left.String()}[${this.index.String()}])`;
+  }
+}

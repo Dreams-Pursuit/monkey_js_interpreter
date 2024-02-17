@@ -12,7 +12,7 @@ const ERROR_OBJ = "ERROR";
 const FUNCTION_OBJ = "FUNCTION";
 const STRING_OBJ = "STRING";
 const BUILTIN_OBJ = "BUILTIN";
-// const ARRAY_OBJ = "ARRAY";
+const ARRAY_OBJ = "ARRAY";
 // const HASH_OBJ = "HASH";
 
 export const ObjectTypeMap = {
@@ -23,8 +23,8 @@ export const ObjectTypeMap = {
   ERROR: "ERROR",
   FUNCTION: "FUNCTION",
   STRING: "STRING",
-  // BUILTIN: "BUILTIN",
-  // ARRAY: "ARRAY",
+  BUILTIN: "BUILTIN",
+  ARRAY: "ARRAY",
   // HASH: "HASH",
 };
 export class Integer extends ObjectType {
@@ -127,5 +127,18 @@ export class Builtin extends ObjectType {
   }
   Inspect() {
     return "builtin function";
+  }
+}
+
+export class ArrayObject extends ObjectType {
+  constructor(elements = []) {
+    super();
+    this.elements = elements;
+  }
+  Type() {
+    return ARRAY_OBJ;
+  }
+  Inspect() {
+    return `[${this.elements.map((e) => e.Inspect()).join(", ")}]`;
   }
 }

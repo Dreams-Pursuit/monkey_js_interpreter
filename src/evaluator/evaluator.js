@@ -13,8 +13,10 @@ import {
   FunctionLiteral,
   CallExpression,
   StringLiteral,
+  ArrayLiteral,
+  IndexExpression,
 } from "../ast/ast.js";
-import { Integer, BooleanType, Null, ReturnValue, ErrorN, Function, String, Builtin } from "../object/object.js";
+import { Integer, BooleanType, Null, ReturnValue, ErrorN, Function, String, Builtin, ArrayObject } from "../object/object.js";
 import { Enviroment } from "../object/enviroment.js";
 import { ObjectTypeMap } from "../object/object.js";
 import { builtins } from "./builtins.js";
@@ -27,6 +29,8 @@ export function evaluate(node, env = new Enviroment()) {
 
   let left, right, val;
   let func, args;
+  let elements;
+  let index;
   switch (node.constructor) {
   case Program:
     return evalProgram(node, env);
@@ -83,9 +87,31 @@ export function evaluate(node, env = new Enviroment()) {
     return applyFunction(func, args);
   case StringLiteral:
     return new String(node.value);
+  case ArrayLiteral:
+    elements = evalExpressions(node.elements, env);
+    if (elements.length === 1 && isError(elements[0])) return elements[0];
+    return new ArrayObject(elements);
+  case IndexExpression:
+    left = evaluate(node.left, env);
+    if (isError(left)) return left;
+    index = evaluate(node.index, env);
+    if (isError(index)) return index;
+    return evalIndexExpression(left, index);
   }
 
   return NULL;
+}
+function evalIndexExpression(left, index) {
+  if (left.Type() === ObjectTypeMap.ARRAY && index.Type() === ObjectTypeMap.INTEGER) {
+    return evalArrayIndexExpression(left, index);
+  }
+  return new ErrorN(`index operator not supported: ${left.Type()}`);
+}
+function evalArrayIndexExpression(array, index) {
+  const idx = index.value;
+  const max = array.elements.length - 1;
+  if (idx < 0 || idx > max) return NULL;
+  return array.elements[idx];
 }
 
 function applyFunction(fn, args) {
@@ -138,8 +164,7 @@ function evalBlockStatement(block, env) {
   let result;
   for (const statement of block.statements) {
     result = evaluate(statement, env);
-
-    if (result !== null) {
+    if (result !== null && result !== undefined) {
       const type = result.Type();
       if (type === ObjectTypeMap.RETURN_VALUE || type === ObjectTypeMap.ERROR) return result;
     }
