@@ -427,3 +427,15 @@ test("parser: test call expression parsing", (t) => {
   testInfixExpression(t, expression.arguments[1], { type: "integer", value: 2 }, "*", { type: "integer", value: 3 });
   testInfixExpression(t, expression.arguments[2], { type: "integer", value: 4 }, "+", { type: "integer", value: 5 });
 });
+
+test("parser: test string literal expression", (t) => {
+  const input = "\"hello world\"";
+  const lexer = new Lexer(input);
+  const parser = new Parser(lexer);
+  const program = parser.parseProgram();
+  checkParserErrors(t, parser);
+
+  const stmt = program.statements[0];
+  const literal = stmt.expression;
+  assert.strictEqual(literal.value, "hello world", `literal.Value not "hello world". got=${literal.value}`);
+});

@@ -36,6 +36,8 @@ export const TokenTypes = {
   IF: "if",
   ELSE: "else",
   RETURN: "return",
+
+  STRING: "STRING",
 };
 
 export class Token {

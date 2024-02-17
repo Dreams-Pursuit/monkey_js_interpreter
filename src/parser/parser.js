@@ -13,6 +13,7 @@ import {
   BlockStatement,
   FunctionLiteral,
   CallExpression,
+  StringLiteral,
 } from "../ast/ast.js";
 import { TokenTypes } from "../token/token.js";
 // import { trace, untrace } from "./parser_tracing.js";
@@ -56,6 +57,7 @@ export class Parser {
     this.registerPrefix(TokenTypes.LPAREN, this.parseGroupedExpression);
     this.registerPrefix(TokenTypes.IF, this.parseIfExpression);
     this.registerPrefix(TokenTypes.FUNCTION, this.parseFunctionLiteral);
+    this.registerPrefix(TokenTypes.STRING, this.parseStringLiteral);
 
     this.registerInfix(TokenTypes.PLUS, this.parseInfixExpression);
     this.registerInfix(TokenTypes.MINUS, this.parseInfixExpression);
@@ -103,6 +105,9 @@ export class Parser {
     return program;
   }
 
+  parseStringLiteral() {
+    return new StringLiteral(this.curToken, this.curToken.literal);
+  }
   parseCallExpression(functionName) {
     const exp = new CallExpression(this.curToken, functionName);
     exp.arguments = this.parseExpressionList(TokenTypes.RPAREN);

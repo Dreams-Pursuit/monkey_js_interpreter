@@ -55,6 +55,17 @@ export class Lexer {
     }
   }
 
+  readString() {
+    const position = this.position + 1;
+    while (true) {
+      this.readChar();
+      if (this.ch === "\"" || this.ch === "\0") {
+        break;
+      }
+    }
+    return this.input.substring(position, this.position);
+  }
+
   nextToken() {
     let tok = new Token(TokenTypes.ILLEGAL, this.ch);
     this.skipWhitespace();
@@ -114,6 +125,10 @@ export class Lexer {
       break;
     case "}":
       tok = new Token(TokenTypes.RBRACE, this.ch);
+      break;
+    case "\"":
+      tok.tokenType = TokenTypes.STRING;
+      tok.literal = this.readString();
       break;
     case "\0":
       tok = new Token(TokenTypes.EOF, "");

@@ -259,3 +259,18 @@ export class CallExpression extends Expression {
     return out;
   }
 }
+
+export class StringLiteral extends Expression {
+  constructor(t = null, v = null) {
+    super();
+    this.token = t;
+    this.value = v;
+  }
+  expressionNode() {}
+  tokenLiteral() {
+    return this.token.literal;
+  }
+  String() {
+    return this.token.literal;
+  }
+}

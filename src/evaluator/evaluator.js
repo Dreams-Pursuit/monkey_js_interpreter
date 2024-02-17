@@ -12,8 +12,9 @@ import {
   Identifier,
   FunctionLiteral,
   CallExpression,
+  StringLiteral,
 } from "../ast/ast.js";
-import { Integer, BooleanType, Null, ReturnValue, ErrorN, Function } from "../object/object.js";
+import { Integer, BooleanType, Null, ReturnValue, ErrorN, Function, String } from "../object/object.js";
 import { Enviroment } from "../object/enviroment.js";
 import { ObjectTypeMap } from "../object/object.js";
 
@@ -79,6 +80,8 @@ export function evaluate(node, env = new Enviroment()) {
     args = evalExpressions(node.arguments, env);
     if (args.length === 1 && isError(args[0])) return args[0];
     return applyFunction(func, args);
+  case StringLiteral:
+    return new String(node.value);
   }
 
   return NULL;
@@ -146,7 +149,10 @@ function evalProgram(program, env) {
   }
   return result;
 }
-
+function evaluateStringInfixExpression(operator, left, right) {
+  if (operator !== "+") return new ErrorN(`unknown operator: ${left.Type()} ${operator} ${right.Type()}`);
+  return new String(left.value + right.value);
+}
 function evaluateIfExpression(ie, env) {
   const condition = evaluate(ie.condition, env);
   if (isError(condition)) return condition;
@@ -176,6 +182,9 @@ function evaluateInfixExpression(operator, left, right) {
   if (operator === "!=") return nativeBoolToBooleanObject(left !== right);
 
   if (left.Type() !== right.Type()) return new ErrorN(`type mismatch: ${left.Type()} ${operator} ${right.Type()}`);
+  if (left.Type() === ObjectTypeMap.STRING && right.Type() === ObjectTypeMap.STRING) {
+    return evaluateStringInfixExpression(operator, left, right);
+  }
 
   return new ErrorN(`unknown operator: ${left.Type()} ${operator} ${right.Type()}`);
 }

@@ -145,6 +145,8 @@ test("evaluator: error handling", () => {
     ["if (10 > 1) { true + false; }", "unknown operator: BOOLEAN + BOOLEAN"],
     ["if (10 > 1) { if (10 > 1) { return true + false; } return 1; }", "unknown operator: BOOLEAN + BOOLEAN"],
     ["foobar", "identifier not found: foobar"],
+    ["\"hello\" - \"world\"", "unknown operator: STRING - STRING"],
+    // ["{\"name\": \"Monkey\"}[fn(x) { x }];", "unusable as hash key: FUNCTION"],
   ];
 
   for (const [input, expected] of tests) {
@@ -202,4 +204,17 @@ test("evaluator: closures", () => {
   addTwo(2);
   `;
   testIntegerObject(testEval(input), 4);
+});
+
+test("evaluator: string literal", () => {
+  const input = "\"hello world!\"";
+  const evaluated = testEval(input);
+  assert.strictEqual(evaluated.Type(), ObjectTypeMap.STRING);
+});
+
+test("evaluator: string concatenation", () => {
+  const input = "\"hello\" + \" \" + \"world!\"";
+  const evaluated = testEval(input);
+  assert.strictEqual(evaluated.Type(), ObjectTypeMap.STRING);
+  assert.strictEqual(evaluated.value, "hello world!");
 });

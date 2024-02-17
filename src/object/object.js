@@ -22,7 +22,7 @@ export const ObjectTypeMap = {
   RETURN_VALUE: "RETURN_VALUE",
   ERROR: "ERROR",
   FUNCTION: "FUNCTION",
-  // STRING: "STRING",
+  STRING: "STRING",
   // BUILTIN: "BUILTIN",
   // ARRAY: "ARRAY",
   // HASH: "HASH",
@@ -100,5 +100,18 @@ export class Function extends ObjectType {
   }
   Inspect() {
     return `fn(${this.parameters.map((p) => p.Inspect()).join(", ")}) {\n${this.body.map((b) => b.Inspect()).join("\n")}\n}`;
+  }
+}
+
+export class String extends ObjectType {
+  constructor(value = "") {
+    super();
+    this.value = value;
+  }
+  Type() {
+    return ObjectTypeMap.STRING;
+  }
+  Inspect() {
+    return this.value;
   }
 }
