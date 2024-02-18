@@ -202,7 +202,9 @@ function evalBlockStatement(block, env) {
 
 function evalProgram(program, env) {
   let result;
+  // console.log(program.statements);
   for (const statement of program.statements) {
+    // console.log(statement);
     result = evaluate(statement, env);
     switch (result.Type()) {
     case ObjectTypeMap.RETURN_VALUE:

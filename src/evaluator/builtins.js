@@ -67,5 +67,11 @@ export const builtins = {
     newElements.push(args[1]);
     return new Array(newElements);
   }),
+  "puts": new Builtin((...args) => {
+    args.forEach((arg) => {
+      console.log(arg.Inspect());
+    });
+    return null;
+  }),
 
 };
