@@ -136,6 +136,9 @@ export class Lexer {
     case "]":
       tok = new Token(TokenTypes.RBRACKET, this.ch);
       break;
+    case ":":
+      tok = new Token(TokenTypes.COLON, this.ch);
+      break;
     case "\0":
       tok = new Token(TokenTypes.EOF, "");
       break;

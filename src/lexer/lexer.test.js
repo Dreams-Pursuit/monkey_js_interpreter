@@ -51,6 +51,7 @@ test("lexer on code", () => {
       "foobar"
       "foo bar"
       [1, 2];
+      {"foo": "bar"}
        `;
   const tests = [
     { expectedType: TokenTypes.LET, expectedLiteral: "let" },
@@ -126,6 +127,11 @@ test("lexer on code", () => {
     { expectedType: TokenTypes.INT, expectedLiteral: "2" },
     { expectedType: TokenTypes.RBRACKET, expectedLiteral: "]" },
     { expectedType: TokenTypes.SEMICOLON, expectedLiteral: ";" },
+    { expectedType: TokenTypes.LBRACE, expectedLiteral: "{" },
+    { expectedType: TokenTypes.STRING, expectedLiteral: "foo" },
+    { expectedType: TokenTypes.COLON, expectedLiteral: ":" },
+    { expectedType: TokenTypes.STRING, expectedLiteral: "bar" },
+    { expectedType: TokenTypes.RBRACE, expectedLiteral: "}" },
     { expectedType: TokenTypes.EOF, expectedLiteral: "" },
   ];
   const lexer = new Lexer(input);

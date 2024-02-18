@@ -29,6 +29,7 @@ export const TokenTypes = {
   RBRACE: "}",
   LBRACKET: "[",
   RBRACKET: "]",
+  COLON: ":",
 
   // keywords
   FUNCTION: "fn",

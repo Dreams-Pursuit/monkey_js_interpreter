@@ -1,3 +1,5 @@
+import { createHash } from "crypto";
+
 
 export class ObjectType {
   Type() { throw new Error("not implemented"); }
@@ -13,7 +15,7 @@ const FUNCTION_OBJ = "FUNCTION";
 const STRING_OBJ = "STRING";
 const BUILTIN_OBJ = "BUILTIN";
 const ARRAY_OBJ = "ARRAY";
-// const HASH_OBJ = "HASH";
+const HASH_OBJ = "HASH";
 
 export const ObjectTypeMap = {
   INTEGER: "INTEGER",
@@ -25,8 +27,48 @@ export const ObjectTypeMap = {
   STRING: "STRING",
   BUILTIN: "BUILTIN",
   ARRAY: "ARRAY",
-  // HASH: "HASH",
+  HASH: "HASH",
 };
+
+export class Hash extends ObjectType {
+  constructor(pairs = new Map()) {
+    super();
+    this.pairs = pairs;
+  }
+  Type() {
+    return HASH_OBJ;
+  }
+  Inspect() {
+    const pairs = [];
+    for (const [key, value] of this.pairs) {
+      pairs.push(`${key.Inspect()}: ${value.Inspect()}`);
+    }
+    return `{${pairs.join(", ")}}`;
+  }
+}
+
+export class HashKey {
+  constructor(type = "", value = "") {
+    this.type = type;
+    this.value = value;
+  }
+  Inspect() {
+    if (this.type === STRING_OBJ) {
+      return `"${this.value}"`;
+    }
+    return this.value;
+  }
+}
+export class HashPair {
+  constructor(key = null, value = null) {
+    this.key = key;
+    this.value = value;
+  }
+  Inspect() {
+    return `${this.key.Inspect()}: ${this.value.Inspect()}`;
+  }
+}
+
 export class Integer extends ObjectType {
   constructor(value = 0) {
     super();
@@ -37,6 +79,9 @@ export class Integer extends ObjectType {
   }
   Inspect() {
     return this.value.toString();
+  }
+  HashKey() {
+    return new HashKey(INTEGER_OBJ, this.value);
   }
 }
 
@@ -50,6 +95,13 @@ export class BooleanType extends ObjectType {
   }
   Inspect() {
     return this.value.toString();
+  }
+  HashKey() {
+    let value = 0;
+    if (this.value) {
+      value = 1;
+    }
+    return new HashKey(BOOLEAN_OBJ, value);
   }
 }
 
@@ -113,6 +165,11 @@ export class String extends ObjectType {
   }
   Inspect() {
     return this.value;
+  }
+  HashKey() {
+    const hash = createHash("sha256");
+    hash.update(this.value);
+    return new HashKey(STRING_OBJ, hash.digest("hex"));
   }
 }
 

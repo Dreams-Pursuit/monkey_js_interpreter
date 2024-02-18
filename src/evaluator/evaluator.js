@@ -15,8 +15,9 @@ import {
   StringLiteral,
   ArrayLiteral,
   IndexExpression,
+  HashLiteral,
 } from "../ast/ast.js";
-import { Integer, BooleanType, Null, ReturnValue, ErrorN, Function, String, Builtin, ArrayObject } from "../object/object.js";
+import { Integer, BooleanType, Null, ReturnValue, ErrorN, Function, String, Builtin, ArrayObject, Hash } from "../object/object.js";
 import { Enviroment } from "../object/enviroment.js";
 import { ObjectTypeMap } from "../object/object.js";
 import { builtins } from "./builtins.js";
@@ -97,6 +98,9 @@ export function evaluate(node, env = new Enviroment()) {
     index = evaluate(node.index, env);
     if (isError(index)) return index;
     return evalIndexExpression(left, index);
+
+  case HashLiteral:
+    return evalHashLiteral(node, env);
   }
 
   return NULL;
@@ -104,9 +108,19 @@ export function evaluate(node, env = new Enviroment()) {
 function evalIndexExpression(left, index) {
   if (left.Type() === ObjectTypeMap.ARRAY && index.Type() === ObjectTypeMap.INTEGER) {
     return evalArrayIndexExpression(left, index);
+  } else if (left.Type() === ObjectTypeMap.HASH) {
+    return evalHashIndexExpression(left, index);
   }
   return new ErrorN(`index operator not supported: ${left.Type()}`);
 }
+
+function evalHashIndexExpression(hash, index) {
+  if (!index.HashKey) return new ErrorN(`unusable as hash key: ${index.Type()}`);
+  const pair = hash.pairs.get(index.HashKey().value);
+  if (!pair) return NULL;
+  return pair[1];
+}
+
 function evalArrayIndexExpression(array, index) {
   const idx = index.value;
   const max = array.elements.length - 1;
@@ -141,6 +155,20 @@ function extendFunctionEnv(fn, args) {
 function unwrapReturnValue(obj) {
   if (obj.constructor === ReturnValue) return obj.value;
   return obj;
+}
+
+function evalHashLiteral(node, env) {
+  const pairs = new Map();
+  for (const [keyNode, valueNode] of node.pairs) {
+    const key = evaluate(keyNode, env);
+    if (isError(key)) return key;
+    if (!key.HashKey) return new ErrorN(`unusable as hash key: ${key.Type()}`);
+    const value = evaluate(valueNode, env);
+    if (isError(value)) return value;
+    const hashed = key.HashKey();
+    pairs.set(hashed.value, [key, value]);
+  }
+  return new Hash(pairs);
 }
 
 function evalExpressions(exps, env) {

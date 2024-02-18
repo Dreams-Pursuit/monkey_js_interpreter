@@ -16,6 +16,7 @@ import {
   StringLiteral,
   ArrayLiteral,
   IndexExpression,
+  HashLiteral,
 } from "../ast/ast.js";
 import { TokenTypes } from "../token/token.js";
 // import { trace, untrace } from "./parser_tracing.js";
@@ -63,6 +64,8 @@ export class Parser {
     this.registerPrefix(TokenTypes.FUNCTION, this.parseFunctionLiteral);
     this.registerPrefix(TokenTypes.STRING, this.parseStringLiteral);
     this.registerPrefix(TokenTypes.LBRACKET, this.parseArrayLiteral);
+    this.registerPrefix(TokenTypes.LBRACE, this.parseBlockStatement);
+    this.registerPrefix(TokenTypes.LBRACE, this.parseHashLiteral);
 
     this.registerInfix(TokenTypes.PLUS, this.parseInfixExpression);
     this.registerInfix(TokenTypes.MINUS, this.parseInfixExpression);
@@ -111,6 +114,27 @@ export class Parser {
     return program;
   }
 
+  parseHashLiteral() {
+    const hash = new HashLiteral(this.curToken);
+    hash.pairs = new Map();
+    while (!this.peekTokenIs(TokenTypes.RBRACE)) {
+      this.nextToken();
+      const key = this.parseExpression(LOWEST);
+      if (!this.expectPeek(TokenTypes.COLON)) {
+        return null;
+      }
+      this.nextToken();
+      const value = this.parseExpression(LOWEST);
+      hash.pairs.set(key, value);
+      if (!this.peekTokenIs(TokenTypes.RBRACE) && !this.expectPeek(TokenTypes.COMMA)) {
+        return null;
+      }
+    }
+    if (!this.expectPeek(TokenTypes.RBRACE)) {
+      return null;
+    }
+    return hash;
+  }
   parseIndexExpression(left) {
     const exp = new IndexExpression(this.curToken, left);
     this.nextToken();

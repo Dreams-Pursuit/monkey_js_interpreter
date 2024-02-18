@@ -5,6 +5,11 @@ import { Parser } from "../parser/parser.js";
 import { evaluate } from "./evaluator.js";
 import { ObjectTypeMap } from "../object/object.js";
 import { Enviroment } from "../object/enviroment.js";
+import { String, BooleanType, Integer, Null } from "../object/object.js";
+
+const TRUE = new BooleanType(true);
+const FALSE = new BooleanType(false);
+const NULL = new Null();
 
 test("evaluator: integer expression", () => {
   const tests = [
@@ -264,6 +269,40 @@ test("evaluator: array index expressions", () => {
     ["[1, 2, 3][-1]", null],
   ];
 
+  for (const [input, expected] of tests) {
+    const evaluated = testEval(input);
+    if (expected === null) {
+      testNullObject(evaluated);
+    } else {
+      testIntegerObject(evaluated, expected);
+    }
+  }
+});
+
+test("evaluator: hash literals", () => {
+  const input = "{\"one\": 10, \"two\": 10 * 2, \"three\": 10 + 2}";
+  const evaluated = testEval(input);
+  const expected = new Map();
+  expected.set(new String("one").HashKey().value, [new String("one"), new Integer(10)]);
+  expected.set(new String("two").HashKey().value, [new String("two"), new Integer(20)]);
+  expected.set(new String("three").HashKey().value, [new String("three"), new Integer(12)]);
+  assert.strictEqual(evaluated.pairs.size, 3);
+  for (const [expectedKey, expectedValue] of expected) {
+    const pair = evaluated.pairs.get(expectedKey);
+    assert.strictEqual(pair[0].value, expectedValue[0].value);
+    testIntegerObject(pair[1], expectedValue[1].value);
+  }
+});
+test("evaluator: hash index expressions", () => {
+  const tests = [
+    ["{\"foo\": 5}[\"foo\"]", 5],
+    ["{\"foo\": 5}[\"bar\"]", null],
+    ["let key = \"foo\"; {\"foo\": 5}[key]", 5],
+    ["{}[\"foo\"]", null],
+    ["{5: 5}[5]", 5],
+    ["{true: 5}[true]", 5],
+    ["{false: 5}[false]", 5],
+  ];
   for (const [input, expected] of tests) {
     const evaluated = testEval(input);
     if (expected === null) {

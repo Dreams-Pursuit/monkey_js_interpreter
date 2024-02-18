@@ -473,3 +473,81 @@ test("parser: tesr parsing index expressions", (t) => {
   testIdentifier(t, indexExp.left, "myArray");
   testInfixExpression(t, indexExp.index, { type: "integer", value: 1 }, "+", { type: "integer", value: 1 });
 });
+
+test("parser: test parsing hash literals string keys", (t) => {
+  const input = "{\"one\": 1, \"two\": 2, \"three\": 3}";
+  const l = new Lexer(input);
+  const p = new Parser(l);
+  const program = p.parseProgram();
+  checkParserErrors(t, p);
+
+  const stmt = program.statements[0];
+  const hash = stmt.expression;
+  if (hash.pairs.size !== 3) {
+    assert.fail(`hash.Pairs has wrong length. got=${hash.pairs.size}`);
+  }
+  const expected = new Map(
+    [
+      ["one", 1],
+      ["two", 2],
+      ["three", 3],
+    ]
+  );
+  for (const [literal, expression] of hash.pairs) {
+    // console.log(literal, expression);
+    const expectedValue = expected.get(literal.value);
+    if (expectedValue === undefined) {
+      assert.fail(`no value for key ${literal} found`);
+    }
+    testIntegralLiteral(t, expression, expectedValue);
+  }
+
+});
+
+test("parser: test parsing empty hash literal", (t) => {
+  const input = "{}";
+  const l = new Lexer(input);
+  const p = new Parser(l);
+  const program = p.parseProgram();
+  checkParserErrors(t, p);
+
+  const stmt = program.statements[0];
+  const hash = stmt.expression;
+  if (hash.pairs.size !== 0) {
+    assert.fail(`hash.Pairs has wrong length. got=${hash.pairs.size}`);
+  }
+});
+
+test("parser: test parsing hash literals with expressions", (t) => {
+  const input = "{\"one\": 0 + 1, \"two\": 10 - 8, \"three\": 15 / 5}";
+  const l = new Lexer(input);
+  const p = new Parser(l);
+  const program = p.parseProgram();
+  checkParserErrors(t, p);
+
+  const stmt = program.statements[0];
+  const hash = stmt.expression;
+  if (hash.pairs.size !== 3) {
+    assert.fail(`hash.Pairs has wrong length. got=${hash.pairs.size}`);
+  }
+  const tests = new Map(
+    [
+      ["one", (e) => {
+        testInfixExpression(t, e, { type: "integer", value: 0 }, "+", { type: "integer", value: 1 });
+      }],
+      ["two", (e) => {
+        testInfixExpression(t, e, { type: "integer", value: 10 }, "-", { type: "integer", value: 8 });
+      }],
+      ["three", (e) => {
+        testInfixExpression(t, e, { type: "integer", value: 15 }, "/", { type: "integer", value: 5 });
+      }],
+    ]
+  );
+  for (const [literal, expression] of hash.pairs) {
+    const testFunc = tests.get(literal.value);
+    if (testFunc === undefined) {
+      assert.fail(`no test function for key ${literal} found`);
+    }
+    testFunc(expression);
+  }
+});

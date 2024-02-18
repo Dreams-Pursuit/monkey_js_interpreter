@@ -308,3 +308,25 @@ export class IndexExpression extends Expression {
     return `(${this.left.String()}[${this.index.String()}])`;
   }
 }
+
+export class HashLiteral extends Expression {
+  constructor(t = null, p = new Map()) {
+    super();
+    this.token = t;
+    this.pairs = p;
+  }
+  expressionNode() {}
+  tokenLiteral() {
+    return this.token.literal;
+  }
+  String() {
+    let out = "{";
+    const pairs = [];
+    for (const [key, value] of this.pairs) {
+      pairs.push(`${key.String()}:${value.String()}`);
+    }
+    out += pairs.join(", ");
+    out += "}";
+    return out;
+  }
+}
