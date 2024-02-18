@@ -5,11 +5,7 @@ import { Parser } from "../parser/parser.js";
 import { evaluate } from "./evaluator.js";
 import { ObjectTypeMap } from "../object/object.js";
 import { Enviroment } from "../object/enviroment.js";
-import { String, BooleanType, Integer, Null } from "../object/object.js";
-
-const TRUE = new BooleanType(true);
-const FALSE = new BooleanType(false);
-const NULL = new Null();
+import { String, Integer } from "../object/object.js";
 
 test("evaluator: integer expression", () => {
   const tests = [
