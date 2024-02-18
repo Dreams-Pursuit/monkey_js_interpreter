@@ -2,7 +2,7 @@
 Based on http://interpreterbook.com/
 
 ## Requirements 
-- Node.js >18
+- Node.js 18+
 
 ## REPL Usage 
 ```
