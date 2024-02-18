@@ -1,4 +1,4 @@
-# JS interpreter of monkey programming language
+# JS interpreter of the monkey programming language
 Based on http://interpreterbook.com/
 
 ## Requirements 
